@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>ICB · Góndola Walmart (Marco Polo)</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    :root {
+      --azul: #0071CE; --azul-dark: #005BA1; --verde: #00A651;
+      --rojo: #E53935; --gris-bg: #F5F6FA; --gris-borde: #E0E3EC;
+      --texto: #1A1D2E; --subtexto: #6B7280; --blanco: #FFFFFF;
+      --radio: 14px; --sombra: 0 2px 12px rgba(0,0,0,0.08);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Inter', sans-serif; background: var(--gris-bg); color: var(--texto); min-height: 100vh; padding-bottom: 40px; }
+    header { background: var(--azul); padding: 18px 20px 16px; display: flex; align-items: center; gap: 12px; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 8px rgba(0,113,206,0.25); }
+    header .logo { width: 36px; height: 36px; background: var(--blanco); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; color: var(--azul); flex-shrink: 0; }
+    header h1 { font-size: 17px; font-weight: 600; color: var(--blanco); line-height: 1.2; }
+    header p  { font-size: 12px; color: rgba(255,255,255,0.75); }
+    .container { max-width: 480px; margin: 0 auto; padding: 20px 16px; }
+    .card { background: var(--blanco); border-radius: var(--radio); box-shadow: var(--sombra); padding: 20px; margin-bottom: 16px; }
+    .card-title { font-size: 13px; font-weight: 600; color: var(--subtexto); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+    .sala-input { width: 100%; padding: 13px 16px; border: 1.5px solid var(--gris-borde); border-radius: 10px; font-size: 15px; font-family: 'Inter', sans-serif; color: var(--texto); outline: none; transition: border-color 0.2s; }
+    .sala-input:focus { border-color: var(--azul); }
+    .sala-dropdown { display: none; position: absolute; top: 100%; left: 0; right: 0; max-height: 240px; overflow-y: auto; background: white; border: 1.5px solid var(--gris-borde); border-top: none; border-radius: 0 0 10px 10px; z-index: 999; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .sala-dropdown div { padding: 10px 14px; cursor: pointer; font-size: 14px; border-bottom: 1px solid #f0f0f0; }
+    .sala-dropdown div:hover { background: #EFF6FF; }
+    .sala-seleccionada { margin-top: 8px; padding: 8px 12px; background: #EFF6FF; border-radius: 8px; font-size: 13px; color: var(--azul); font-weight: 500; display: none; }
+    .upload-zone { border: 2px dashed var(--gris-borde); border-radius: var(--radio); padding: 32px 20px; text-align: center; cursor: pointer; transition: all 0.2s; background: var(--gris-bg); }
+    .upload-zone:hover, .upload-zone.drag-over { border-color: var(--azul); background: #EFF6FF; }
+    .upload-zone .icon { font-size: 36px; margin-bottom: 10px; }
+    .upload-zone h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .upload-zone p { font-size: 13px; color: var(--subtexto); }
+    .btn-camara { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 10px 18px; background: var(--azul); color: var(--blanco); border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.2s; }
+    .btn-camara:hover { background: var(--azul-dark); }
+    .resultados { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
+    .resultado-item {
+      display: flex; gap: 12px; background: var(--gris-bg); border-radius: 10px;
+      padding: 12px; align-items: flex-start;
+    }
+    .resultado-item canvas, .resultado-item img.miniatura {
+      border-radius: 8px; background: var(--gris-borde); max-width: 96px; width: 100%; height: auto;
+      flex-shrink: 0; cursor: zoom-in;
+    }
+    .resultado-info { flex: 1; min-width: 0; }
+    .resultado-info .nombre { font-size: 12px; font-weight: 600; word-break: break-all; margin-bottom: 4px; }
+    .resultado-info .estado-ok { color: var(--verde); font-size: 12px; font-weight: 600; }
+    .resultado-info .estado-error { color: var(--rojo); font-size: 12px; font-weight: 600; }
+    .resultado-info .estado-pendiente { color: var(--subtexto); font-size: 12px; }
+    .resultado-info .remove-btn {
+      background: none; border: none; color: var(--subtexto); font-size: 12px;
+      cursor: pointer; padding: 0; margin-top: 4px; text-decoration: underline;
+    }
+    .clases-lista { margin-top: 6px; font-size: 11px; color: var(--texto); }
+    .clases-lista .fila { display: flex; justify-content: space-between; padding: 1px 0; }
+    .clases-lista .swatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
+    .btn-subir { width: 100%; padding: 15px; background: var(--verde); color: var(--blanco); border: none; border-radius: var(--radio); font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-subir:hover:not(:disabled) { filter: brightness(0.92); transform: translateY(-1px); }
+    .btn-subir:disabled { background: var(--gris-borde); color: var(--subtexto); cursor: not-allowed; transform: none; }
+
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 3000;
+      align-items: center; justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal-content { position: relative; max-width: 95vw; max-height: 95vh; }
+    .modal-viewport {
+      overflow: hidden;
+      border-radius: 8px;
+      background: var(--gris-borde);
+      cursor: grab;
+      user-select: none;
+    }
+    .modal-viewport.dragging { cursor: grabbing; }
+    .modal-viewport canvas {
+      display: block;
+      transform-origin: center center;
+    }
+    .modal-close {
+      position: absolute; top: -44px; right: 0;
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--blanco); border: none; cursor: pointer;
+      font-size: 16px; line-height: 1;
+    }
+    .modal-nombre {
+      position: absolute; top: -44px; left: 0;
+      color: var(--blanco); font-size: 13px; font-weight: 500;
+      max-width: calc(50% - 10px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .modal-zoom-controls {
+      position: absolute; top: -44px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 6px;
+    }
+    .modal-zoom-controls button {
+      width: 34px; height: 34px; border-radius: 50%;
+      background: var(--blanco); border: none; cursor: pointer;
+      font-size: 16px; font-weight: 600; line-height: 1;
+    }
+    .modal-zoom-controls #modal-zoom-reset {
+      width: auto; border-radius: 17px; padding: 0 12px; font-size: 11px;
+    }
+    .modal-hint {
+      position: absolute; bottom: -26px; left: 0; right: 0;
+      text-align: center; color: rgba(255, 255, 255, 0.65); font-size: 11px;
+    }
+    .progress-wrap { display: none; margin-bottom: 16px; }
+    .progress-bar-bg { background: var(--gris-borde); border-radius: 99px; height: 8px; overflow: hidden; }
+    .progress-bar-fill { height: 100%; background: var(--azul); border-radius: 99px; transition: width 0.3s; width: 0%; }
+    .progress-label { font-size: 12px; color: var(--subtexto); margin-top: 6px; text-align: center; }
+    .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); padding: 14px 24px; border-radius: 12px; font-size: 14px; font-weight: 500; color: var(--blanco); box-shadow: 0 4px 20px rgba(0,0,0,0.2); z-index: 9999; opacity: 0; transition: opacity 0.3s; white-space: nowrap; max-width: 90vw; text-align: center; }
+    .toast.show { opacity: 1; }
+    .toast.success { background: var(--verde); }
+    .toast.error   { background: var(--rojo); }
+    .info-strip { display: flex; align-items: center; gap: 10px; background: #EFF6FF; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; border: 1px solid #BFDBFE; }
+    .info-strip p { font-size: 12px; color: #1E40AF; line-height: 1.4; }
+
+    .camara-overlay {
+      display: none;
+      position: fixed; inset: 0; background: #000; z-index: 2000;
+    }
+    .camara-overlay.show { display: block; }
+    #camara-video {
+      position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+    }
+    .camara-guia {
+      position: absolute;
+      border: 3px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
+      border-radius: 6px;
+      pointer-events: none;
+    }
+    .camara-hint {
+      position: absolute; top: 18px; left: 16px; right: 16px;
+      text-align: center; color: #fff; font-size: 13px; font-weight: 500;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    }
+    .camara-controles {
+      position: absolute; bottom: 30px; left: 0; right: 0;
+      display: flex; align-items: center; justify-content: center; gap: 36px;
+    }
+    .camara-btn-capturar {
+      width: 68px; height: 68px; border-radius: 50%;
+      background: #fff; border: 4px solid rgba(255, 255, 255, 0.45);
+      cursor: pointer; font-size: 24px;
+    }
+    .camara-btn-cancelar {
+      background: rgba(255, 255, 255, 0.15); color: #fff; border: none;
+      padding: 10px 16px; border-radius: 20px; font-size: 13px; cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">ICB</div>
+  <div>
+    <h1>Registro de Góndola · Marco Polo</h1>
+    <p>Walmart · Canal Moderno</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="info-strip">
+    <span style="font-size:18px">📋</span>
+    <p>Sube fotos de góndola de <strong>Papas Fritas Amarillas Marco Polo</strong> y <strong>Rústicas Marco Polo</strong>. Selecciona la sala antes de subir.</p>
+  </div>
+
+  <!-- Selección de sala -->
+  <div class="card">
+    <div class="card-title">📍 Sala</div>
+    <div style="position:relative">
+      <input
+        type="text"
+        id="sala-input"
+        class="sala-input"
+        placeholder="Escribe para buscar una sala..."
+        autocomplete="off"
+        oninput="filtrarSalas()"
+        onfocus="mostrarDropdown()"
+        onblur="setTimeout(ocultarDropdown, 200)"
+      />
+      <div id="sala-dropdown" class="sala-dropdown"></div>
+    </div>
+    <div id="sala-seleccionada" class="sala-seleccionada">✅ <span id="sala-nombre"></span></div>
+  </div>
+
+  <!-- Subida de imágenes -->
+  <div class="card">
+    <div class="card-title">📷 Imágenes de góndola</div>
+    <div class="upload-zone" id="upload-zone">
+      <div class="icon">🖼️</div>
+      <h3>Selecciona fotos</h3>
+      <p>Puedes subir varias a la vez desde galería</p>
+      <input type="file" id="file-input" accept="image/*" multiple style="display:none" />
+      <br/>
+      <button class="btn-camara" onclick="document.getElementById('file-input').click()">
+        📁 Elegir desde galería
+      </button>
+      <br/>
+      <button class="btn-camara" style="margin-top:8px; background:#00A651;"
+        onclick="abrirCamara()">
+        📷 Tomar foto
+      </button>
+      <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" />
+    </div>
+    <div class="resultados" id="resultados"></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-wrap" id="progress-wrap">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="progress-bar"></div>
+    </div>
+    <div class="progress-label" id="progress-label">Guardando imágenes...</div>
+  </div>
+
+  <!-- Botón confirmar -->
+  <button class="btn-subir" id="btn-subir" disabled onclick="confirmarYGuardar()">
+    ✅ Confirmar y guardar
+  </button>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="camara-overlay" id="camara-overlay">
+  <video id="camara-video" autoplay playsinline muted></video>
+  <div class="camara-guia" id="camara-guia"></div>
+  <div class="camara-hint">Encuadrá la góndola completa (aprox. 120cm ancho x 175cm alto)</div>
+  <div class="camara-controles">
+    <button class="camara-btn-cancelar" id="camara-cancelar">✕ Cancelar</button>
+    <button class="camara-btn-capturar" id="camara-capturar" aria-label="Capturar foto"></button>
+  </div>
+</div>
+<canvas id="camara-canvas" style="display:none;"></canvas>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal-content">
+    <span class="modal-nombre" id="modal-nombre"></span>
+    <div class="modal-zoom-controls">
+      <button id="modal-zoom-out" title="Alejar">−</button>
+      <button id="modal-zoom-reset" title="Restablecer">1:1</button>
+      <button id="modal-zoom-in" title="Acercar">+</button>
+    </div>
+    <button class="modal-close" id="modal-close" aria-label="Cerrar">✕</button>
+    <div class="modal-viewport" id="modal-viewport">
+      <canvas id="modal-canvas"></canvas>
+    </div>
+    <div class="modal-hint">Scroll para zoom · arrastrá para mover · doble click para restablecer</div>
+  </div>
+</div>
+
+<script src="config.js"></script>
+<script src="roboflow-client.js"></script>
+<script>
+  const SUPABASE_URL  = 'https://nolpvuulobusfuvjuxob.supabase.co';
+  const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vbHB2dXVsb2J1c2Z1dmp1eG9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMDQ0NjIsImV4cCI6MjA5NjU4MDQ2Mn0.KA6c8-7jS8x4LL83ngTptgD5JCoqFrNs3kcsHwnJCPc';
+  const BUCKET = 'gondola-imagenes';
+  const TABLA  = 'imagenes_gondola';
+
+  let items      = []; // { id, file, estado: 'procesando'|'ok'|'error', detections, img, error }
+  let contadorId = 0;
+  let salaActual = '';
+
+  // Esta versión solo etiqueta/cuenta Marco Polo Amarilla y Rústica -- el
+  // modelo sigue detectando las demás clases por dentro, pero se filtran
+  // antes de mostrarse o guardarse (ver procesarDeteccion).
+  const CLASES_PERMITIDAS = ['mp_amarilla', 'mp_rustica'];
+  const CLASES_COLUMNAS = CLASES_PERMITIDAS;
+
+  // Paleta fija por clase para que los recuadros sean consistentes entre fotos.
+  const PALETA = ['#0071CE', '#00A651', '#E53935', '#F5A623', '#8E44AD', '#16A085', '#D35400', '#2C3E50', '#C0392B', '#27AE60'];
+  const colorPorClase = new Map();
+  function colorDeClase(nombreClase) {
+    if (!colorPorClase.has(nombreClase)) {
+      colorPorClase.set(nombreClase, PALETA[colorPorClase.size % PALETA.length]);
+    }
+    return colorPorClase.get(nombreClase);
+  }
+
+  // ── Modal de zoom (revisar el etiquetado en grande) ─────
+  const modalOverlay  = document.getElementById('modal-overlay');
+  const modalViewport = document.getElementById('modal-viewport');
+  const modalCanvas   = document.getElementById('modal-canvas');
+  const modalNombre   = document.getElementById('modal-nombre');
+  const modalClose    = document.getElementById('modal-close');
+
+  const zoomState = { zoom: 1, panX: 0, panY: 0 };
+  const ZOOM_MIN = 1;
+  const ZOOM_MAX = 6;
+  let arrastrando = false;
+  let arrastreInicio = { x: 0, y: 0, panX: 0, panY: 0 };
+
+  modalClose.addEventListener('click', cerrarModal);
+  modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) cerrarModal(); });
+  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarModal(); });
+
+  function aplicarTransformModal() {
+    modalCanvas.style.transform = `translate(${zoomState.panX}px, ${zoomState.panY}px) scale(${zoomState.zoom})`;
+    modalViewport.style.cursor = zoomState.zoom > 1 ? 'grab' : 'default';
+  }
+
+  function cambiarZoom(factor) {
+    zoomState.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoomState.zoom * factor));
+    if (zoomState.zoom === ZOOM_MIN) { zoomState.panX = 0; zoomState.panY = 0; }
+    aplicarTransformModal();
+  }
+
+  function resetearZoomModal() {
+    zoomState.zoom = 1;
+    zoomState.panX = 0;
+    zoomState.panY = 0;
+    aplicarTransformModal();
+  }
+
+  document.getElementById('modal-zoom-in').addEventListener('click', () => cambiarZoom(1.3));
+  document.getElementById('modal-zoom-out').addEventListener('click', () => cambiarZoom(1 / 1.3));
+  document.getElementById('modal-zoom-reset').addEventListener('click', resetearZoomModal);
+
+  modalViewport.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    cambiarZoom(e.deltaY < 0 ? 1.15 : 1 / 1.15);
+  }, { passive: false });
+
+  modalViewport.addEventListener('dblclick', () => {
+    if (zoomState.zoom > 1) {
+      resetearZoomModal();
+    } else {
+      zoomState.zoom = 2.5;
+      aplicarTransformModal();
+    }
+  });
+
+  modalViewport.addEventListener('mousedown', (e) => {
+    if (zoomState.zoom <= 1) return;
+    arrastrando = true;
+    modalViewport.classList.add('dragging');
+    arrastreInicio = { x: e.clientX, y: e.clientY, panX: zoomState.panX, panY: zoomState.panY };
+  });
+  window.addEventListener('mousemove', (e) => {
+    if (!arrastrando) return;
+    zoomState.panX = arrastreInicio.panX + (e.clientX - arrastreInicio.x);
+    zoomState.panY = arrastreInicio.panY + (e.clientY - arrastreInicio.y);
+    aplicarTransformModal();
+  });
+  window.addEventListener('mouseup', () => {
+    arrastrando = false;
+    modalViewport.classList.remove('dragging');
+  });
+
+  function dibujarDetecciones(canvas, img, detecciones, maxAncho = 96) {
+    const escala = Math.min(1, maxAncho / img.naturalWidth);
+    canvas.width  = img.naturalWidth * escala;
+    canvas.height = img.naturalHeight * escala;
+
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    detecciones.forEach((d) => {
+      const x1 = (d.x - d.width / 2) * escala;
+      const y1 = (d.y - d.height / 2) * escala;
+      const w  = d.width * escala;
+      const h  = d.height * escala;
+      const color = colorDeClase(d.class);
+
+      const grosor = Math.max(1, Math.min(2.5, w * 0.015));
+      ctx.strokeStyle = color;
+      ctx.lineWidth = grosor;
+      ctx.strokeRect(x1, y1, w, h);
+
+      const fontSize = Math.max(9, Math.min(16, w * 0.2));
+      ctx.font = `${Math.round(fontSize)}px Inter, sans-serif`;
+
+      let etiqueta = d.class;
+      while (etiqueta.length > 3 && ctx.measureText(etiqueta).width > w - 4) {
+        etiqueta = etiqueta.slice(0, -1);
+      }
+      if (etiqueta !== d.class) etiqueta = etiqueta.slice(0, -1) + '…';
+
+      const anchoTexto = ctx.measureText(etiqueta).width + fontSize * 0.6;
+      const altoEtiqueta = fontSize + 3;
+      ctx.fillStyle = color;
+      ctx.fillRect(x1, Math.max(0, y1 - altoEtiqueta), anchoTexto, altoEtiqueta);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(etiqueta, x1 + fontSize * 0.3, Math.max(fontSize, y1 - 3));
+    });
+  }
+
+  function abrirModal(nombre, img, detecciones) {
+    const resolucionDibujo = Math.min(img.naturalWidth, 1600);
+    dibujarDetecciones(modalCanvas, img, detecciones, resolucionDibujo);
+    modalNombre.textContent = nombre;
+    modalOverlay.classList.add('show');
+
+    const availW = (window.innerWidth || 1200) * 0.92;
+    const availH = (window.innerHeight || 800) * 0.72;
+    const fit = Math.min(availW / modalCanvas.width, availH / modalCanvas.height, 1);
+    const anchoBase = modalCanvas.width * fit;
+    const altoBase  = modalCanvas.height * fit;
+    modalCanvas.style.width  = `${anchoBase}px`;
+    modalCanvas.style.height = `${altoBase}px`;
+    modalViewport.style.width  = `${anchoBase}px`;
+    modalViewport.style.height = `${altoBase}px`;
+
+    resetearZoomModal();
+  }
+
+  function cerrarModal() {
+    modalOverlay.classList.remove('show');
+  }
+
+  function renderClasesLista(detecciones) {
+    const conteo = new Map();
+    detecciones.forEach((d) => conteo.set(d.class, (conteo.get(d.class) || 0) + 1));
+    const filas = [...conteo.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .map(([clase, n]) => `
+        <div class="fila">
+          <span><span class="swatch" style="background:${colorDeClase(clase)}"></span>${clase}</span>
+          <span>${n}</span>
+        </div>
+      `)
+      .join('');
+    return `<div class="clases-lista">${filas}</div>`;
+  }
+
+  // ── Cámara con guía de encuadre ─────────────────────────
+  // Proporción real de la góndola: ~120cm de ancho x ~175cm de alto.
+  const RATIO_GONDOLA = 120 / 175;
+
+  let camaraStream = null;
+  const camaraOverlay = document.getElementById('camara-overlay');
+  const camaraVideo    = document.getElementById('camara-video');
+  const camaraGuia     = document.getElementById('camara-guia');
+  const camaraCanvas   = document.getElementById('camara-canvas');
+
+  async function abrirCamara() {
+    try {
+      camaraStream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: 'environment',
+          width: { ideal: 4096 },
+          height: { ideal: 4096 },
+        },
+        audio: false,
+      });
+      camaraVideo.srcObject = camaraStream;
+      camaraOverlay.classList.add('show');
+      requestAnimationFrame(posicionarGuia);
+    } catch (err) {
+      // Sin permiso de cámara / navegador sin soporte -- recae en el selector nativo.
+      console.error('No se pudo abrir la cámara en la página, usando selector nativo:', err);
+      document.getElementById('camera-input').click();
+    }
+  }
+
+  function posicionarGuia() {
+    const vw = camaraVideo.clientWidth;
+    const vh = camaraVideo.clientHeight;
+    if (!vw || !vh) return;
+    let alto  = vh * 0.82;
+    let ancho = alto * RATIO_GONDOLA;
+    if (ancho > vw * 0.92) {
+      ancho = vw * 0.92;
+      alto  = ancho / RATIO_GONDOLA;
+    }
+    camaraGuia.style.width  = `${ancho}px`;
+    camaraGuia.style.height = `${alto}px`;
+    camaraGuia.style.left   = `${(vw - ancho) / 2}px`;
+    camaraGuia.style.top    = `${(vh - alto) / 2}px`;
+  }
+
+  window.addEventListener('resize', () => {
+    if (camaraOverlay.classList.contains('show')) posicionarGuia();
+  });
+
+  function cerrarCamara() {
+    if (camaraStream) {
+      camaraStream.getTracks().forEach((t) => t.stop());
+      camaraStream = null;
+    }
+    camaraOverlay.classList.remove('show');
+  }
+
+  document.getElementById('camara-cancelar').addEventListener('click', cerrarCamara);
+
+  document.getElementById('camara-capturar').addEventListener('click', () => {
+    const vw = camaraVideo.videoWidth;
+    const vh = camaraVideo.videoHeight;
+    if (!vw || !vh) return;
+    camaraCanvas.width  = vw;
+    camaraCanvas.height = vh;
+    camaraCanvas.getContext('2d').drawImage(camaraVideo, 0, 0, vw, vh);
+    camaraCanvas.toBlob((blob) => {
+      if (!blob) return;
+      const archivo = new File([blob], `gondola_${Date.now()}.jpg`, { type: 'image/jpeg' });
+      agregarArchivos([archivo]);
+      cerrarCamara();
+    }, 'image/jpeg', 0.92);
+  });
+
+  // ── Salas ──────────────────────────────────────────────
+  const SALAS_LIST = ["001 Lider Express - Av.11 de Septiembre 2249, Providencia", "0012 Acuenta - Av. Las Delicias Sur 302, Parral", "0013 Acuenta - Pedro de Valdivia 02195, Temuco", "0015 Líder Express - Av. Las Condes 10295, Las Condes", "0016 Lider Express - El Rodeo 12850, Lo Barnechea", "0018 Lider Express - Manuel Montt 80, Providencia", "002 Lider Express - Av.Pedro de Valdivia 1885, Providencia", "003 Hiper Lider - Av. Irarrazaval 2928, Nunoa", "0032 Hiper Lider - Gran Avenida 6150, San Miguel", "0033 Hiper Lider - Balmaceda 3242, Calama", "0034 Lider Express - Av.Eduardo Frei 4025, Miraflores Alto, Vina Del Mar", "0035 Hiper Lider - Av. Pdte.Eduardo Frei Montalva 190, Rancagua", "0038 Hiper Lider - Einstein 263, Rancagua", "0039 Hiper Lider - Recreo 620, Rancagua", "004 Lider Express - Av. Vitacura 4100, Vitacura", "0040 Lider Express - Avda.Brasil 1303, Valparaíso", "0041 Hiper Lider - Av. Americo Vespucio 1737, Huechuraba", "0042 Hiper Lider - Carmen 1190 al 1196, local 101-125, Curicó", "0043 Lider Express - Av. San Miguel N335, Talca", "0044 Hiper Lider - Av. Americo Vespucio 3100, Penalolen", "0049 Hiper Lider - Av.OHiggins 314, Quilicura", "005 Acuenta - Ritoque 3133, Quintero", "0050 Acuenta - Javiera Carrera 330, Chimbarongo", "0051 Lider Express - Las Camelias 2875, Providencia", "0052 Lider Express - Av. Grecia 245, Nunoa", "0068 Central Mayorista - Julio Buschmann 2426, Osorno", "007 Acuenta - Av. 18 de Septiembre 311, Paine", "008 Lider Express - Cuarto Centenario 1016, Las Condes", "0166 Lider Express - Av. Los Carrera 990, Quilpué", "017 Acuenta - Alcazar 1278, Collipulli", "0219 Central Mayorista - Av. Americo Vespucio 2500, Cerrillos", "036 Hiper Lider - Av. Ricardo Vicuña 284, Los Ángeles", "037 Hiper Lider - Matucana 1202, Quinta Normal", "045 Hiper Lider - Av. Americo Vespucio Norte 1955, Maipu", "0451 Acuenta - Merced 1067, Melipilla", "046 Hiper Lider - Av. Central 2689, Maipu", "048 Hiper Lider - Av. Los Toros 05441, Puente Alto", "053 Hiper Lider - Av. Domeyko 55, Coquimbo", "054 Hiper Lider - Av. Vicuña Mackenna 7196, La Florida", "055 Hiper Lider - Av. José Pedro Alessandri 2127, Macul", "056 Lider Express - Gran Avenida 4004, San Miguel", "057 Hiper Lider - Buenaventura 1770 Vitacura", "058 Hiper Lider - 15 Norte 961, Viña del Mar", "060 Lider Express - Av. Americo Vespucio Sur 1790, Las Condes", "061 Lider Express - Ramon Freire 1790, Maipu", "062 Hiper Lider - Froilan Roa 7107, Local E-103, La Florida", "065 Lider Express - Rancagua 0180, Providencia", "066 Hiper Lider - Av. Bernardo OHiggins 807, Talagante", "071 Hiper Lider - Av. Americo Vespucio Sur 881, Nunoa", "072 Hiper Lider - Av. Padre Alberto Hurtado 060,Estacion Central", "073 Hiper Lider - Av. Concha y Toro 1149, Puente Alto", "074 Lider Express - Tomas Moro 1590, Las Condes", "0743 Lider Express - Av. Borgoño 14650, Valparaíso", "075 Hiper Lider - Av. Pajaritos 4500, Maipu", "076 Hiper Lider - Av. Américo Vespucio 6325, La Florida", "077 Hiper Lider - Av. Independencia 4142, Conchali", "078 Hiper Lider - Av Héroes de la Concepción 2653, Iquique", "079 Hiper Lider - 9 Oriente 1241, Talca", "0798 Hiper Lider -Lo Blanco Av. Ochagavia 13115, San Bernardo", "080 Hiper Lider - Riquelme 69, El Bosque", "081 Hiper Lider - Diego Portales 2291, Arica", "082 Hiper Lider - San Jose N69, San Bernardo", "083 Hiper Lider - Av. Santa Amalia 1763, La Florida", "084 Hiper Lider - Av. Ramón Freire 1351, Quilpué", "085 Hiper Lider - Av. Americo Vespucio 2500, Cerrillos", "086 Hiper Lider - Av.Recoleta 3501, Recoleta", "087 Hiper Lider - Santa Rosa 9233, San Ramon", "088 - Hiper Líder Cam. El Alba 11865, Las Condes, Región Metropolitana", "089 Hiper Líder - Talcahuano 9000, Hualpén", "091 Hiper Lider - Zenteno 21, Antofagasta", "092 Hiper Lider - Av. Francisco de Aguirre 02, La Serena", "093 Hiper Lider - Errázuriz 1358, Osorno", "0934 Lider Express - Av. Paseo Pie Andino 5855, Lo Barnechea", "094 Hiper Lider - Coronel Santiago Bueras 1400, Valdivia", "0948 Acuenta - Calle Mariquina 995, Mariquina", "095 Hiper Lider - Jorge Alessandri 1131, La Reina", "0954 Acuenta - Calle Uno Sur 70, Temuco", "096 Hiper Lider - Av. Prieto Norte 0320, Temuco", "097 Hiper Lider - Av. Las Condes 12916, Lo Barnechea", "0970 Central Mayorista - Av. Francisco de Aguirre 02, La Serena", "0977 Central Mayorista - Av. El Parque Isidora 1055, Pudahuel", "0978 Hiper Lider - Arturo Prat 244, Limache", "098 Hiper Lider - Av. Arturo Prat 651, Concepción", "0985 Hiper Lider - Av. Libertador Bernardo OHiggins 740, San Felipe", "0986 Acuenta - Av. Alessandri 187, Frutillar", "099 Hiper Lider - Av. Parque Industrial 400, Puerto Montt", "0990 Central Mayorista - Camino a Melipilla 17800, Maipú", "0997 Acuenta - Arturo Prat 402, Lota", "120 Hiper Li­der - Gabriela Mistral 02621, Temuco", "121 Hiper Lider - Av. Eduardo Frei Montalva 01110, Punta Arenas", "122 Hiper Lider - Av. 21 de Mayo 311, Quillota", "124 Lider Express - Huerfanos 827, Santiago", "125 Hiper Lider - Calle Recinto Interior Estación N48, Ovalle", "126 Híper Líder - Av. Chacabuco 120, Copiapó", "127 Hiper Lider - Av. Anibal León Bustos 280, Linares", "128 Acuenta - Vilcún Quintrilpe Lote 1, Vilcun", "129 Lider Express - Av.Gramado 565, Puerto Varas", "134 Lider Express - Av. Villagrán 551, Los Ángeles", "137 Hiper Lider Neptuno 720 San Pablo Lo Prado", "139 Lider Express - Av.Chicureo S/N Sector Laguna P.R., Colina", "140 Lider Express - Av. Libertador Bernardo OHiggins 5199, Estacion Central", "142 Lider Express - Dos Sur 2015, Talca", "143 Hiper Lider - Av. Colín 0240, Talca", "144 Lider Express - Av. Anibal Pinto 299, Parral", "146 Lider Express - Av. Chorrillos 1821, San Javier de Loncomilla", "149 Lider Express - Calle Los Alamos S/N Loteo, Colina", "154 Acuenta - Av. Peñafiel con Padre Damian, Ovalle", "155 Acuenta - Cienfuegos 1475, San Javier de Loncomilla", "156 Acuenta - Av. 9 Sur 686, Talca", "159 Central Mayorista - Av. San Luis 4335, Peñalolén", "160 Acuenta - Diego Echeverria 085, Quillota", "161 Acuenta - Avda Eyzaguirre 1951, Puente Alto", "164 Lider Express - Calle Valparaiso 239, Viña del Mar", "165 Lider Express - Av. Irarrázaval 5353, Á'uñoa", "167 Acuenta - Huelen 1894, Cerro Navia", "168 Acuenta - Gran Bretaña 4041, Hualpén", "169 Acuenta - Calle Villagrán 951, Mulchén", "170 Acuenta - Av Matta 1400, Quilicura", "171 Acuenta - Eucaliptus 81, San Bernardo", "174 Lider Express - Av. Isabel Riquelme Sur 1446, Maipu", "176 Acuenta - CD General Lagos 1278, Traiguén", "177 Lider Express - Av. Iquique 5201, Antofagasta", "178 Acuenta - Teno II (Comalle)", "179 Acuenta - Av. Rinconada 2525, Maipú", "180 Lider Express - Irarrázaval 2410, Á'uñoa", "182 Hiper Lider - Av.Bernardo Ohiggins N 555, Buin", "183 Lider Express Av. Los Pablos 2050", "184 Acuenta - Av Principal 1195, Conchali", "186 Acuenta - Lo Martinez 645, El Bosque", "187 Acuenta - Las Violetas 887, Cabrero", "188 Lider Express - Isabel La Catolica 4394, Las Condes", "189 Lider Express - Av Salvador 1824, Á'uñoa", "19 Central Mayorista - Av. Ferrocarril K.4, Puerto Montt", "191 Acuenta - Sofia Carmona 0301, La Granja", "193 Acuenta - Domingo Tocornal 369, Puente Alto", "194 Acuenta - Jorge Alessandri, Sitio 3 y 4, Puerto Montt", "195 Lider Express - Benavente 696,Puerto Montt", "196 Lider Express - Jose Domingo Canas, 1580, Nunoa", "198 Acuenta - Santa Ines 2189, Conchalí", "199 Walmart - El Barrancon 2525, San Bernardo", "201 Express 400 - San Diego 219, Santiago", "202 Express 400 - Curico 517, Santiago", "203 Express 400 - San Pablo 2902, Santiago", "204 Express 400 - Providencia 1634, Providencia", "205 Express 400 - Bandera 814, Santiago", "206 Express 400 - Alameda 2843, Santiago", "207 Express 400 - Colombia 7111, La Florida", "208 Express 400 - Jose Luis Coo 0158, Puente Alto", "209 Express 400 - Pedro de Valdivia 5359, nunoa", "210 Express 400 - Recoleta 2302, Recoleta", "211 Express 400 - Coventry 601, nunoa", "213 Express 400 - Tobalaba 1177, Providencia", "214 Express 400 - Vicuna Mackenna 9840, La Florida", "215 Express 400 - Grajales 2146, Santiago", "216 Express 400 - El Olimpo 1990, Maipu", "217 Express 400 - Artigas 2877, nunoa", "218 Express 400 - Santa Isabel 861, Providencia", "224 Express 400 - San Luis 1221-B, Quilicura", "227 Express 400 - Galileo 1610, Cerrillos", "228 Express 400 - Vitacura 5322, Vitacura", "229 Express 400 - Ramon Cruz 3219, Macul", "230 Express 400 - Irarrazaval 710, nunoa", "233 Express 400 - Carrascal 4436, Quinta Normal", "235 Express 400 - Primo de Rivera 1447, Maipu", "239Express 400 - Bagdad 855-877, Maipu", "241 Express 400 - Laguna Sur 8438, Pudahuel", "242 Express 400 - Los Leones 1881, Providencia", "243 Acuenta - Eduardo Frei 4025, Viña del Mar", "244 Hiper Lider - Camino Internacional 2440, Viña del Mar", "245 Express 400 - Laguna Sur 7383, Pudahuel", "246 Express 400 - San Pablo 9091, Pudahuel", "247 Express 400 - Vicuna Mackenna 8725-8799, La Florida", "248 Lider Express - Av. Bernardo O'higgins 581, Quilicura", "252 Lider Express - Av. Calera De Tango, Calera de Tango", "253 Lider Express - Carretera Gral San Martin Km 10, Colina", "256 Express 400 - Jorge A. Monckeberg 1911, nunoa", "257 Express 400 - Eliodoro Yanez 1405, Providencia", "258 Express 400 - Las Rejas Sur 854, Estacion Central", "259 Express 400 - Obispo Valdes Subercaseaux 1421, Valparaiso", "262 Express 400 - Las Industrias 5155, San Joaquin", "267 Express 400 - Vicuna Mackenna 1918, Penaflor", "268 Express 400 - Independencia 650, Independencia", "269 Express 400 - El Salto 1871, Recoleta", "271 Express 400 - Santa Isabel 464, Santiago", "274 Express 400 - Santa Luisa 366, Quilicura", "275 Express 400 - Bellavista 257, Recoleta", "276 Lider Express - La Montana Nte. 2394, Lampa", "279 Hiper Lider - Balmaceda 950, Curicó", "280 Express 400 - Juan de Dios Malebran 1750, Puente Alto", "285 Express 400 - Segunda Transversal 1022, Maipu", "291 Express 400 - Arneb 2520, Villa Alemana", "294 Express 400 - Primera Transversal 800, Padre Hurtado", "295 Express 400 - Independencia 4553, Conchali", "299 Express 400 - Av. Apoquindo 4400 Local 142, Las Condes", "3057 Walmart - Sin Direccion (Vitacura), Vitacura", "368 Hiper Lider - Av. Chacabuco N120 (Lunch), Copiapo", "420 Express 400 - Avenida Central 5960, Pedro Aguirre Cerda", "421 Express 400 - El Descanso 798, Maipu", "422 Express 400 - Manquehue Sur 841, Las Condes", "425 Híper Líder - Av. Los Carrera 3791, Copiapó", "426 Hiper Lider - Av. Sor Vicenta 2575, Los Ángeles", "430 Express 400 - Portugal 225, Santiago", "431 Express 400 - Gabriel Bonzalez Videla 2372, Maipu", "436 Express 400 - El Tranque 1292, Pudahuel", "438 Express 400 - Lo Cruzat 401, Quilicura", "439 Acuenta - Av. I. Dubournais 0398, El Quisco", "440 Acuenta - Andres Bello 140, Lebu", "442 Express 400 - Simon Bolivar, Maipu, Maipu", "443 Express 400 - Lo Barnechea 1000, Lo Barnechea", "445 Express 400 - Cuatro Poniente 350, Maipu", "446 Express 400 - Julio Vrancken 2788, Talagante", "453 Central Mayorista - Catorce de la Fama 2841, Conchalí", "454 Acuenta - Avda Matta 1202, Lautaro", "456 Híper Líder - Barros Arana 308, Temuco", "457 Hiper Lider - Camino Troncal 1561, Villa Alemana", "458 Express 400 - Monjitas 728, Santiago", "459 Hiper Lider - Huaytiquina 459, Calama", "461 Express 400 - Recoleta 909, Recoleta", "462 Express 400 - Pudeto 3170, Quillota", "463 Lider Express - Av. Colón 2572, Valparaíso", "467 Acuenta - Av. Maestranza S/N Lote 4, Ovalle", "469 Express 400 - Lo Ovalle 1395, San Miguel", "471 Express 400 - Av Wilkinson 202, Valparaiso", "477 Express 400 - Rafael Tagle 100, Requinoa", "478 Acuenta - Carlos Pratt González 901, Coronel", "482 Express 400 - Av Victoria 3073, Valparaiso", "483 Acuenta - Dr Sotero Del Rio 831, La Florida", "484 Express 400 - Independencia 1113, Independencia", "488 Express 400 - Av. Gomez Carreno 1080, esq. Leucoton, Quilpue", "490 Acuenta - Manuel Rodriguez 684, Isla de Maipo", "496 Express 400 - Gran Avenida 8540, La Cisterna", "498 Express 400 - Froilan Roa 5308, Macul", "500 Acuenta - Calle Estero Maitenlahue n 925, Viña del Mar", "501 Acuenta - Manuel Antonio Matta n 025 Esquina Balmaceda, Temuco", "502 Acuenta - Januario Espinoza 759-769, Linares", "503 Acuenta - Avenida Gabriela Poniente 03960, Puente Alto", "504 Acuenta - Avenida La Travesía 7127, Pudahuel", "505 Acuenta - Avenida Andalién 950, Concepción", "506 Acuenta - Avenida LaTorre 280, Calera", "507 Acuenta - Avda Carrascal 6003, Quinta Normal", "508 Acuenta - Lircay 2301 (ex 145), Talca", "510 Acuenta - Avenida Padre Hurtado 13.310 (Ex Los Morros), San Bernardo", "511 Acuenta - Avenida Fermín Vivaceta 827, Independencia", "512 Acuenta - Avenida 21 de Mayo 841, Peñaflor", "513 Central Mayorista - Veinte Oriente 1795, Talca", "514 Lider Express - San Juan 2184, Machalí", "516 Lider Express - Av. Bellavista 1273, Concepción", "518 Hiper Lider - Av. Argentina 602, Valparaíso", "519 Acuenta - Av. Maquehue 1243, Padre Las Casas", "521 Acuenta - Av. Galvarino Riveros 1703, Castro", "522 Acuenta - Carlos Anwandter 930, Valdivia", "523 Lider Express - Av. Alcázar 635, Los Ángeles", "524 Lider Express - Cesar Ercilla 1740, Osorno", "525 Lider Express - San Ignacio 1624, Padre Hurtado", "526 Acuenta - Calle Maipón 873, Chillán", "527 Acuenta - Avenida Camilo Henriquez 469, Curicó", "528 Acuenta - Avenida Camilo Henriquez 798, Curicó", "529 Acuenta - Avenida Lo Ovalle 2356, Lo Espejo", "531 Acuenta - Avda Manuel Rodriguez 2550, Chiguayante", "533 Acuenta - Avenida Sur 411, Maipú", "534 Acuenta - Calle Parque Alerce Andino 1901, Puerto Montt", "535 Acuenta - Camino Melipilla 18.500, Maipú", "537 Acuenta - Avenida Republica 870, Osorno", "538 Acuenta - Avda Tobalaba 10.831, Peñalolén", "539 Acuenta - Vicuna Mackena 1050, Renca", "540 Acuenta - Avda Recoleta 5252, Huechuraba", "541 Acuenta - Avenida Caupolican 1498, Renca", "544 Acuenta - Maipu 171, San Felipe", "545 Acuenta - Avenida Diego Portales N°1001, Puerto Montt", "551 Acuenta - Gómez Carreño 3521, Talcahuano", "553 Acuenta - Federico Errazuriz 230, Buin", "554 Acuenta - Avda Cristobal Colon 8.831, Hualpén", "556 Acuenta - Avda Republica 221, Limache", "557 Acuenta - Avda El Sol 1071, Rancagua", "558 Acuenta - Avda Pedro Montt 4.300, Valdivia", "559 Acuenta - Picarte 2661, Valdivia", "560 Acuenta - Aviador Acevedo 1258, Villarrica", "561 Acuenta - Avenida J. B. Alberdi 2000, Quillota", "562 Acuenta - Avda Manuel Rodriguez 770, San Fernando", "565 Acuenta - Ohiggins Esquina Riquelme, Angol", "566 Acuenta - Avda Los Puelches 1691, Chillán", "567 Acuenta - Ruta A-16 S/N, Alto Hospicio", "568 Acuenta - Maipu 2083, Molina", "569 Acuenta - Av. San Miguel /Esquina Circunvalacion 30 Oriente, Talca", "570 Acuenta - Claudina Urrutia 41, Cauquenes", "571 Acuenta - Av. Lo Errazuriz 1625, Cerrillos", "572 Acuenta - Cerro Esmeralda 3130, Alto Hospicio", "573 Acuenta - Avda Caupolican 621, Arauco", "574 Acuenta - Anibal Pinto 410, Nueva Imperial", "575 Acuenta - Av. Viña del Mar 2950, La Serena", "577 Acuenta - Manuel Solis 340, Rengo", "578 Acuenta - Avda Luis Guevara Ortuzar 2002, Valparaíso", "579 Acuenta - Avda Baquedano 862, Lampa", "580 Acuenta - Av Los Libertadores 453, El Monte", "581 Acuenta - Los Clarines 2231, Coquimbo", "582 Acuenta - Av. Independencia 861, San Carlos", "583 Acuenta - Rosas 131, Constitución", "585 Acuenta - San Miguel 781, Cartagena", "586 Acuenta - Calle Infante 205, Penco", "587 Acuenta - Mariano Egaña 820, Tomé", "588 Acuenta - Av. Calle Las Azaleas N 604, Los Ángeles", "589 Acuenta - Diego Portales 1271, La Ligua", "590 Acuenta - Michaihue 120, San Pedro de la Paz", "591 Acuenta - Los Carrera 1420, Los Ángeles", "592 Acuenta - Doce Oriente 848, Talca", "593 Acuenta - Ignacio Carrera Pinto 0170, Talca", "594 Acuenta - Ernesto Riquelme 432, La Unión", "595 Acuenta - Bruno Larrain 340, Salamanca", "598 Acuenta - Av. La Compañía 440, Graneros", "600 Lider Express - Santa Teresa 735, La Ligua", "601 Lider Express - Avda. Papudo 261, Los Andes", "602 Hiper Lider - Av. Santa Teresa 683, Los Andes", "603 Lider Express - Av. Consistorial N3349, Peñalolén", "605 Lider Express - Balmaceda 2154, La Serena", "606 Hiper Lider - Av. Manuel Montt 2328, Coronel", "607 Hiper Lider - Av. Vicuna Mackenna 0153, Melipilla", "608 Hiper Lider - Av. Collín 698, Chillán", "610 Lider Express - Av. Nonato Coo 3108, Puente Alto", "611 Lider Express - Av. Sanchez Fontecilla 8968, La Florida", "612 Lider Express - Av. Paul Harris 1155, Chillán", "613 Lider Express - Av. Diego Portales 06303, Puente Alto", "614 Lider Express -Larapinta Barros Luco 3200, Lampa", "615 Lider Express - Av. Pedro Montt 1865 - 1875 - 1879, Valparaíso", "616 Hiper Lider - Av. Tres Poniente 0900, Maipu", "618 Hiper Lider - Av.Alcalde René Soriano 2855, Osorno", "619 Lider Express - Av Monseñor Ramón Munita 1625, Puerto Montt", "620 Hiper Lider - Av Pdte.Jorge Alessandri 20040, San Bernardo", "621 Lider Express - Merced 560, Santiago", "622 Acuenta - Mapocho 5041, Quinta Normal", "623 Acuenta - Los Loros 1521, Copiapó", "624 Lider Express - La Plaza 590 , Las Condes", "625 Lider Express - Las Hiedras 765-715, Concón", "626 Hiper Lider - Principe de Gales 9140, La Reina", "627 Lider Express - Calle German Riesco 510, San Vicente de Tagua Tagua", "628 Hiper Lider - Av. Rafael Casanova 344, Santa Cruz", "631 Hiper Lider - Av. Juan Bosco 2084, Concepción", "632 Hiper Lider - Av. Valparaiso N 1070, Viña del Mar", "635 Hiper Lider - Diego Portales 640, Arica", "636 Acuenta - OHiggins 240, Victoria", "638 Lider Express -  Diego Portales 88, Panguipulli", "640 Lider Express - Av. Diez de Julio Huamachuco N1625, Santiago", "643 Lider Express - Av. Mexico 1589, Puente Alto", "644 Lider Express - Tocornal S/N, San Felipe", "645 Lider Express - Av. Sta. Maria 172, Rancagua", "646 Lider Express - Av. Laguna Grande N 227, San Pedro de la Paz", "647 Lider Express - Ruta F-30 E Lote R-1, Puchuncaví", "648 Acuenta - Salvador Allende 824, Illapel", "650 Lider Express - Av. Ignacio Carrera Pinto / Guillermo Mücke, Algarrobo", "652 Líder Express - Av. Manuel Recabarren N 02320, Temuco", "653 Lider Express - Av. Alessandri 1231, Curicó", "654 Hiper Lider - Avenida Barros Lucos 2970, San Antonio", "655 Hiper Lider - Caparrosa 355, Antofagasta", "656 Lider Express - San Martin 555, Buin", "657 Lider Express - Serrano 550, Castro", "658 Lider Express - Avenida San Francico 666, Puerto Varas", "668 Lider Express - Calle Carrera N 1165, Calera", "670 Hiper Lider - Avenida Presidente Ibáñez 1433, Puerto Montt", "671 Hiper Lider - Av. Lo Marcoleta 365, Quilicura", "674 Lider Express - Av. Pedro Fontova 7455, Huechuraba", "676 Lider Express - San Pablo 2398, Santiago", "677 Lider Express - Santa Isabel 168, Providencia", "678 Lider Express - Av. Valparaíso 601, Villa Alemana", "679 Hiper Lider - Teresa Wilms Montt 2263, Iquique", "680 Lider Express - Saturnino Epulef 1356, Villarrica", "681 Lider Express - OHiggins 964, Pucón", "682 Hiper Lider - Av. Vicuna Mackenna 3361, San Joaquin", "683 Lider Express - Ramón Picarte 640, Valdivia", "684 Hiper Lider - Guillermo Ulriksen 3128, La Serena", "685 Lider Express - Santo Domingo 131, Santiago", "686 Hiper Lider - Regimiento Arica 6145, La Serena", "687 Lider Express Av Rudecindo Ortega 01575", "689 Lider Express - San Martin 35, Santiago", "690 Hiper Lider - Puerto Rico 8421, Pudahuel", "693 Hiper Lider - Gabriela 2541, La Pintana", "695 Lider Express - Av. Diagonal Donihue 2521, Rancagua", "696 Lider Express - Av. Curauma Norte 2961, Valparaíso", "697 Hiper Lider - Av. Bernardo Ohiggins 0450, San Fernando", "699 Lider Express - Padre Alonso Ovalle 730, Santiago", "727 Acuenta - Ortuzar 323, Pichilemu", "728 Lider Express - Av. Portugal 634 (Local 1), Santiago", "736 Hiper Lider - Balmaceda 750, Penaflor", "739 Hiper Lider - Camino Melipilla 15990 (Mid Mall Maipu), Maipu", "742 Lider Express - Av. Paicavi 1376, Concepción", "744 Lider Express - Americo Vespucio 1122, Maipu", "745 Acuenta - Villa Laegre 645, Nacimiento", "746 Acuenta - Constitución 793, Casablanca", "747 Hiper Lider - Av. Magallanes 1050, Concón", "748 Hiper Lider - Av. Miraflores 8412, Renca", "751 Acuenta - Av. Luco 365, Mostazal", "764 Lider Express - Av. Las Rastras 1800, Talca", "766 Acuenta - Ruta D-43 N 1200, Coquimbo", "767 Acuenta - Huanhuali 1331, Villa Alemana", "771 Acuenta - Pascual Baburizza 716, Los Andes", "772 Acuenta - Rodelillo 6071, Valparaíso", "773 Acuenta - Yungay 303, Vicuña", "783 Acuenta - Ambrosio OHiggins 2110, Curacaví", "784 Acuenta - Pedro Lagos 1201, Río Bueno", "787 Acuenta - Av Bernardo O Higgins 823, Curanilahue", "793 Acuenta - Veintiuno de Mayo 950, San Antonio", "802 Lider Express - Camilo Henriquez 1045, Puente Alto", "805 Acuenta - Bombero Perret 248, Hualqui", "878 Acuenta - Eluterio Ramirez 156, Purranque", "895 Acuenta - Humeres 266, Cabildo", "901 Central Mayorista - Av. Prieto Norte", "902 Express 400 - Brasil 66, Santiago", "903 Central Mayorista - Av. San Pedro De La Paz S/N", "910 Hiper Lider - Camino La Farfana 1400, Maipu", "929 Hiper Lider - Avenida Ferrocarril 2001, Camino Alerce Km 3.5, Puerto Montt", "937 Lider Express - Av. El Amanecer 1401, Coquimbo", "939 Central Mayorista - Av. Americo Vespucio 2500, Cerrillos", "940 Lider Express - Av. Americo Vespucio 1650, Quilicura", "945 Hiper Lider - Av. Manuel Rodriguez 1057, Chiguayante", "947 Acuenta - Av. Estadio 859, Las Cabras", "952 Hiper Lider - Perez Gacitua 279, Talcahuano", "959 Central Mayorista - Av. Freire 1351, Quilpué", "963 Lider Express - Camino Apacible 635, Pudahuel", "972 Acuenta - Calle Oriente 2 #228, Longaví", "980 Acuenta - Sin Dirección (Carahue Villagran)", "982 Central Mayorista - Av. Libertador Bernardo OHiggins 1280, Rancagua", "983 Hiper Lider - Lautaro 78, La Calera", "987 Acuenta - Cayumanqui 341, Quillón", "988 Hiper Lider - Av. Grecia 1120, Calama", "991 Lider Express - Las Parcelas 990, La Serena", "992 Acuenta - Av. José Manuel Balmaceda 751, Loncoche", "993 Hiper Lider - Los Mañíos 4455, San Pedro de la Paz", "996 Acuenta - Huamachuco 945, San Clemente", "Food E-Commerce (Eduardo Frei Montalva 8301, Quilicura)", "GM E-Commerce, Laguna Sur 9660 A, Pudahuel"];
+
+  function filtrarSalas() {
+    const q = document.getElementById('sala-input').value.toLowerCase().trim();
+    salaActual = '';
+    document.getElementById('sala-seleccionada').style.display = 'none';
+    actualizarBoton();
+    renderDropdown(q);
+    document.getElementById('sala-dropdown').style.display = 'block';
+  }
+
+  function renderDropdown(q) {
+    const dd = document.getElementById('sala-dropdown');
+    const lista = q
+      ? SALAS_LIST.filter(s => s.toLowerCase().includes(q)).slice(0, 60)
+      : SALAS_LIST.slice(0, 60);
+    if (lista.length === 0) {
+      dd.innerHTML = '<div style="color:#9CA3AF;font-size:13px;">Sin resultados</div>';
+    } else {
+      dd.innerHTML = lista.map(s => {
+        const safe = s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+        return `<div onclick="seleccionarSala('${safe}')">${s}</div>`;
+      }).join('');
+    }
+  }
+
+  function seleccionarSala(nombre) {
+    salaActual = nombre;
+    document.getElementById('sala-input').value = nombre;
+    document.getElementById('sala-nombre').textContent = nombre;
+    document.getElementById('sala-seleccionada').style.display = 'block';
+    document.getElementById('sala-dropdown').style.display = 'none';
+    actualizarBoton();
+  }
+
+  function mostrarDropdown() {
+    const q = document.getElementById('sala-input').value.toLowerCase().trim();
+    renderDropdown(q);
+    document.getElementById('sala-dropdown').style.display = 'block';
+  }
+
+  function ocultarDropdown() {
+    document.getElementById('sala-dropdown').style.display = 'none';
+  }
+
+  // ── Supabase ───────────────────────────────────────────
+  async function supabaseFetch(path, options = {}) {
+    return fetch(`${SUPABASE_URL}${path}`, {
+      ...options,
+      headers: { 'apikey': SUPABASE_ANON, 'Authorization': `Bearer ${SUPABASE_ANON}`, ...options.headers }
+    });
+  }
+
+  async function subirAStorage(file, nombre) {
+    const res = await supabaseFetch(`/storage/v1/object/${BUCKET}/${nombre}`, {
+      method: 'POST',
+      headers: { 'Content-Type': file.type || 'image/jpeg', 'x-upsert': 'true' },
+      body: file
+    });
+    if (!res.ok) throw new Error(`Storage error: ${res.status}`);
+    return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${nombre}`;
+  }
+
+  async function insertarEnDB(sala, url, nombre, detecciones) {
+    const conteoPorClase = {};
+    CLASES_COLUMNAS.forEach((c) => { conteoPorClase[c] = 0; });
+    detecciones.forEach((d) => {
+      if (d.class in conteoPorClase) conteoPorClase[d.class] += 1;
+    });
+
+    const fila = {
+      sala,
+      url_imagen: url,
+      nombre_archivo: nombre,
+      total_productos: detecciones.length,
+      ...conteoPorClase,
+    };
+
+    const res = await supabaseFetch(`/rest/v1/${TABLA}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+      body: JSON.stringify(fila)
+    });
+    if (!res.ok) throw new Error(`DB error: ${res.status}`);
+  }
+
+  // ── Archivos: se agregan y se detectan de inmediato ─────
+  function agregarArchivos(nuevos) {
+    const validos = nuevos.filter((f) => f.type.startsWith('image/'));
+    validos.forEach((file) => {
+      const item = { id: ++contadorId, file, estado: 'procesando', detections: null, img: null, error: null };
+      items.push(item);
+      procesarDeteccion(item);
+    });
+    renderPreviews();
+    actualizarBoton();
+  }
+
+  async function procesarDeteccion(item) {
+    try {
+      // Se manda una copia redimensionada al detector -- Vercel corta
+      // requests de más de ~4.5MB (base64 infla el tamaño ~33%) y las fotos
+      // de cámara de celular/galería a menudo superan eso. La foto original
+      // sin tocar (item.file) es la que se sube a Supabase al confirmar.
+      const imagenRedimensionada = await redimensionarParaDeteccion(item.file);
+      const [resultado, img] = await Promise.all([
+        window.RoboflowGondola.runGondolaWorkflow(imagenRedimensionada),
+        cargarImagen(imagenRedimensionada),
+      ]);
+      item.estado = 'ok';
+      item.detections = resultado.detections.filter((d) => CLASES_PERMITIDAS.includes(d.class));
+      item.img = img; // misma imagen que se detectó -- coordenadas coinciden
+    } catch (err) {
+      item.estado = 'error';
+      item.error = err.message || 'Error procesando la imagen';
+      console.error('[Roboflow] Error en', item.file.name, err);
+    }
+    renderPreviews();
+    actualizarBoton();
+  }
+
+  function cargarImagen(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = () => reject(new Error('No se pudo cargar la imagen en el navegador'));
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  async function redimensionarParaDeteccion(file, maxLado = 1600, calidad = 0.8) {
+    const img = await cargarImagen(file);
+    const escala = Math.min(1, maxLado / Math.max(img.naturalWidth, img.naturalHeight));
+    const canvas = document.createElement('canvas');
+    canvas.width  = Math.round(img.naturalWidth * escala);
+    canvas.height = Math.round(img.naturalHeight * escala);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', calidad));
+    if (!blob) throw new Error('No se pudo redimensionar la imagen');
+    return blob;
+  }
+
+  function renderPreviews() {
+    const cont = document.getElementById('resultados');
+    cont.innerHTML = '';
+
+    if (items.length === 0) {
+      cont.innerHTML = '<div class="preview-count">Elegí o tomá fotos para que se procesen automáticamente.</div>';
+      return;
+    }
+
+    items.forEach((item) => {
+      const div = document.createElement('div');
+      div.className = 'resultado-item';
+
+      if (item.estado === 'procesando') {
+        div.innerHTML = `
+          <img class="miniatura" src="${URL.createObjectURL(item.file)}" />
+          <div class="resultado-info">
+            <div class="nombre">${item.file.name}</div>
+            <div class="estado-pendiente">⏳ Procesando…</div>
+            <button class="remove-btn" onclick="removeFile(${item.id})">Quitar</button>
+          </div>
+        `;
+      } else if (item.estado === 'ok') {
+        const canvas = document.createElement('canvas');
+        dibujarDetecciones(canvas, item.img, item.detections);
+        canvas.addEventListener('click', () => abrirModal(item.file.name, item.img, item.detections));
+
+        const info = document.createElement('div');
+        info.className = 'resultado-info';
+        info.innerHTML = `
+          <div class="nombre">${item.file.name}</div>
+          <div class="estado-ok">✅ ${item.detections.length} producto(s) detectado(s)</div>
+          ${renderClasesLista(item.detections)}
+          <button class="remove-btn" onclick="removeFile(${item.id})">Quitar</button>
+        `;
+        div.appendChild(canvas);
+        div.appendChild(info);
+      } else {
+        div.innerHTML = `
+          <img class="miniatura" src="${URL.createObjectURL(item.file)}" />
+          <div class="resultado-info">
+            <div class="nombre">${item.file.name}</div>
+            <div class="estado-error">❌ ${item.error}</div>
+            <button class="remove-btn" onclick="removeFile(${item.id})">Quitar</button>
+          </div>
+        `;
+      }
+
+      document.getElementById('resultados').appendChild(div);
+    });
+  }
+
+  function removeFile(id) {
+    items = items.filter((it) => it.id !== id);
+    renderPreviews();
+    actualizarBoton();
+  }
+
+  function actualizarBoton() {
+    const hayPendientes = items.some((it) => it.estado === 'procesando');
+    document.getElementById('btn-subir').disabled = !(salaActual && items.length > 0 && !hayPendientes);
+  }
+
+  document.getElementById('file-input').addEventListener('change', e => {
+    agregarArchivos(Array.from(e.target.files));
+    e.target.value = '';
+  });
+  document.getElementById('camera-input').addEventListener('change', e => {
+    agregarArchivos(Array.from(e.target.files));
+    e.target.value = '';
+  });
+
+  const zone = document.getElementById('upload-zone');
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('drag-over');
+    agregarArchivos(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+  });
+
+  // ── Confirmar y guardar ─────────────────────────────────
+  // La detección ya se hizo al agregar cada foto (procesarDeteccion). Acá
+  // solo se sube la imagen y se guarda la fila con los conteos ya calculados.
+  async function confirmarYGuardar() {
+    const hayPendientes = items.some((it) => it.estado === 'procesando');
+    if (!salaActual || items.length === 0 || hayPendientes) return;
+
+    const btn    = document.getElementById('btn-subir');
+    const pwrap  = document.getElementById('progress-wrap');
+    const pbar   = document.getElementById('progress-bar');
+    const plabel = document.getElementById('progress-label');
+    btn.disabled = true;
+    pwrap.style.display = 'block';
+
+    const errores = [];
+    let totalDetecciones = 0;
+
+    for (let i = 0; i < items.length; i++) {
+      const item = items[i];
+      plabel.textContent = `Guardando ${i + 1} de ${items.length}...`;
+      pbar.style.width   = `${Math.round((i / items.length) * 100)}%`;
+      try {
+        const ts     = new Date().toISOString().replace(/[:.]/g, '-');
+        const uid    = Math.random().toString(36).slice(2, 8);
+        const ext    = item.file.name.split('.').pop() || 'jpg';
+        const nombre = `${salaActual.replace(/[^a-zA-Z0-9]/g, '_')}_${ts}_${uid}.${ext}`;
+        const detecciones = item.estado === 'ok' ? item.detections : [];
+
+        const url = await subirAStorage(item.file, nombre);
+        await insertarEnDB(salaActual, url, nombre, detecciones);
+        totalDetecciones += detecciones.length;
+      } catch (err) {
+        errores.push(item.file.name);
+        console.error(err);
+      }
+    }
+
+    pbar.style.width = '100%';
+    plabel.textContent = 'Completado';
+    setTimeout(() => { pwrap.style.display = 'none'; pbar.style.width = '0%'; }, 1000);
+
+    if (errores.length === 0) {
+      mostrarToast(`✅ ${items.length} foto(s) guardada(s) · ${totalDetecciones} producto(s) detectado(s)`, 'success');
+      items = [];
+      salaActual = '';
+      renderPreviews();
+      document.getElementById('sala-input').value = '';
+      document.getElementById('sala-seleccionada').style.display = 'none';
+    } else {
+      mostrarToast(`⚠️ Error en ${errores.length} foto(s)`, 'error');
+    }
+    actualizarBoton();
+  }
+
+  function mostrarToast(msg, tipo = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className   = `toast ${tipo} show`;
+    setTimeout(() => t.classList.remove('show'), 3500);
+  }
+</script>
+</body>
+</html>
