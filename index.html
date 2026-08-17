@@ -34,80 +34,14 @@
     .upload-zone p { font-size: 13px; color: var(--subtexto); }
     .btn-camara { display: inline-flex; align-items: center; gap: 8px; margin-top: 14px; padding: 10px 18px; background: var(--azul); color: var(--blanco); border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; font-family: 'Inter', sans-serif; transition: background 0.2s; }
     .btn-camara:hover { background: var(--azul-dark); }
-    .resultados { display: flex; flex-direction: column; gap: 12px; margin-top: 16px; }
-    .resultado-item {
-      display: flex; gap: 12px; background: var(--gris-bg); border-radius: 10px;
-      padding: 12px; align-items: flex-start;
-    }
-    .resultado-item canvas, .resultado-item img.miniatura {
-      border-radius: 8px; background: var(--gris-borde); max-width: 96px; width: 100%; height: auto;
-      flex-shrink: 0; cursor: zoom-in;
-    }
-    .resultado-info { flex: 1; min-width: 0; }
-    .resultado-info .nombre { font-size: 12px; font-weight: 600; word-break: break-all; margin-bottom: 4px; }
-    .resultado-info .estado-ok { color: var(--verde); font-size: 12px; font-weight: 600; }
-    .resultado-info .estado-error { color: var(--rojo); font-size: 12px; font-weight: 600; }
-    .resultado-info .estado-pendiente { color: var(--subtexto); font-size: 12px; }
-    .resultado-info .remove-btn {
-      background: none; border: none; color: var(--subtexto); font-size: 12px;
-      cursor: pointer; padding: 0; margin-top: 4px; text-decoration: underline;
-    }
-    .clases-lista { margin-top: 6px; font-size: 11px; color: var(--texto); }
-    .clases-lista .fila { display: flex; justify-content: space-between; padding: 1px 0; }
-    .clases-lista .swatch { display: inline-block; width: 8px; height: 8px; border-radius: 2px; margin-right: 5px; vertical-align: middle; }
-    .btn-subir { width: 100%; padding: 15px; background: var(--verde); color: var(--blanco); border: none; border-radius: var(--radio); font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .btn-subir:hover:not(:disabled) { filter: brightness(0.92); transform: translateY(-1px); }
+    #preview-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+    .preview-item { position: relative; border-radius: 8px; overflow: hidden; aspect-ratio: 1; background: var(--gris-borde); }
+    .preview-item img { width: 100%; height: 100%; object-fit: cover; }
+    .preview-item .remove-btn { position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; background: rgba(0,0,0,0.6); color: white; border: none; border-radius: 50%; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    .preview-count { font-size: 13px; color: var(--subtexto); margin-top: 10px; text-align: center; }
+    .btn-subir { width: 100%; padding: 15px; background: var(--azul); color: var(--blanco); border: none; border-radius: var(--radio); font-size: 16px; font-weight: 600; cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .btn-subir:hover:not(:disabled) { background: var(--azul-dark); transform: translateY(-1px); }
     .btn-subir:disabled { background: var(--gris-borde); color: var(--subtexto); cursor: not-allowed; transform: none; }
-
-    .modal-overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0, 0, 0, 0.85);
-      z-index: 3000;
-      align-items: center; justify-content: center;
-      padding: 24px;
-    }
-    .modal-overlay.show { display: flex; }
-    .modal-content { position: relative; max-width: 95vw; max-height: 95vh; }
-    .modal-viewport {
-      overflow: hidden;
-      border-radius: 8px;
-      background: var(--gris-borde);
-      cursor: grab;
-      user-select: none;
-    }
-    .modal-viewport.dragging { cursor: grabbing; }
-    .modal-viewport canvas {
-      display: block;
-      transform-origin: center center;
-    }
-    .modal-close {
-      position: absolute; top: -44px; right: 0;
-      width: 34px; height: 34px; border-radius: 50%;
-      background: var(--blanco); border: none; cursor: pointer;
-      font-size: 16px; line-height: 1;
-    }
-    .modal-nombre {
-      position: absolute; top: -44px; left: 0;
-      color: var(--blanco); font-size: 13px; font-weight: 500;
-      max-width: calc(50% - 10px); overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .modal-zoom-controls {
-      position: absolute; top: -44px; left: 50%; transform: translateX(-50%);
-      display: flex; gap: 6px;
-    }
-    .modal-zoom-controls button {
-      width: 34px; height: 34px; border-radius: 50%;
-      background: var(--blanco); border: none; cursor: pointer;
-      font-size: 16px; font-weight: 600; line-height: 1;
-    }
-    .modal-zoom-controls #modal-zoom-reset {
-      width: auto; border-radius: 17px; padding: 0 12px; font-size: 11px;
-    }
-    .modal-hint {
-      position: absolute; bottom: -26px; left: 0; right: 0;
-      text-align: center; color: rgba(255, 255, 255, 0.65); font-size: 11px;
-    }
     .progress-wrap { display: none; margin-bottom: 16px; }
     .progress-bar-bg { background: var(--gris-borde); border-radius: 99px; height: 8px; overflow: hidden; }
     .progress-bar-fill { height: 100%; background: var(--azul); border-radius: 99px; transition: width 0.3s; width: 0%; }
@@ -134,10 +68,25 @@
       border-radius: 6px;
       pointer-events: none;
     }
+    .camara-ghost {
+      position: absolute;
+      opacity: 0.45;
+      pointer-events: none;
+      border-right: 2px dashed rgba(255, 255, 255, 0.85);
+      border-left: 2px dashed rgba(255, 255, 255, 0.85);
+    }
     .camara-hint {
       position: absolute; top: 18px; left: 16px; right: 16px;
       text-align: center; color: #fff; font-size: 13px; font-weight: 500;
       text-shadow: 0 1px 4px rgba(0, 0, 0, 0.7);
+    }
+    .camara-topbar {
+      position: absolute; top: 52px; left: 16px; right: 16px;
+      display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;
+    }
+    .camara-pill {
+      background: rgba(255, 255, 255, 0.18); color: #fff; border: 1px solid rgba(255, 255, 255, 0.45);
+      padding: 7px 14px; border-radius: 16px; font-size: 12px; cursor: pointer; font-family: 'Inter', sans-serif;
     }
     .camara-controles {
       position: absolute; bottom: 30px; left: 0; right: 0;
@@ -209,7 +158,8 @@
       </button>
       <input type="file" id="camera-input" accept="image/*" capture="environment" style="display:none" />
     </div>
-    <div class="resultados" id="resultados"></div>
+    <div id="preview-grid"></div>
+    <div class="preview-count" id="preview-count"></div>
   </div>
 
   <!-- Progress -->
@@ -217,12 +167,12 @@
     <div class="progress-bar-bg">
       <div class="progress-bar-fill" id="progress-bar"></div>
     </div>
-    <div class="progress-label" id="progress-label">Guardando imágenes...</div>
+    <div class="progress-label" id="progress-label">Subiendo imágenes...</div>
   </div>
 
-  <!-- Botón confirmar -->
-  <button class="btn-subir" id="btn-subir" disabled onclick="confirmarYGuardar()">
-    ✅ Confirmar y guardar
+  <!-- Botón subir -->
+  <button class="btn-subir" id="btn-subir" disabled onclick="subirImagenes()">
+    ⬆️ Subir imágenes
   </button>
 
 </div>
@@ -232,213 +182,48 @@
 <div class="camara-overlay" id="camara-overlay">
   <video id="camara-video" autoplay playsinline muted></video>
   <div class="camara-guia" id="camara-guia"></div>
-  <div class="camara-hint">Encuadrá la góndola completa (aprox. 120cm ancho x 175cm alto)</div>
+  <canvas class="camara-ghost" id="camara-ghost" style="display:none;"></canvas>
+  <div class="camara-hint" id="camara-hint">Encuadrá la góndola completa (aprox. 120cm ancho x 175cm alto)</div>
+  <div class="camara-topbar">
+    <button class="camara-pill" id="camara-direccion" type="button"></button>
+    <button class="camara-pill" id="camara-nueva-serie" type="button" style="display:none;">🔄 Nueva serie</button>
+  </div>
   <div class="camara-controles">
-    <button class="camara-btn-cancelar" id="camara-cancelar">✕ Cancelar</button>
+    <button class="camara-btn-cancelar" id="camara-cancelar">✕ Cerrar</button>
     <button class="camara-btn-capturar" id="camara-capturar" aria-label="Capturar foto"></button>
   </div>
 </div>
 <canvas id="camara-canvas" style="display:none;"></canvas>
 
-<div class="modal-overlay" id="modal-overlay">
-  <div class="modal-content">
-    <span class="modal-nombre" id="modal-nombre"></span>
-    <div class="modal-zoom-controls">
-      <button id="modal-zoom-out" title="Alejar">−</button>
-      <button id="modal-zoom-reset" title="Restablecer">1:1</button>
-      <button id="modal-zoom-in" title="Acercar">+</button>
-    </div>
-    <button class="modal-close" id="modal-close" aria-label="Cerrar">✕</button>
-    <div class="modal-viewport" id="modal-viewport">
-      <canvas id="modal-canvas"></canvas>
-    </div>
-    <div class="modal-hint">Scroll para zoom · arrastrá para mover · doble click para restablecer</div>
-  </div>
-</div>
-
-<script src="config.js"></script>
-<script src="roboflow-client.js"></script>
 <script>
   const SUPABASE_URL  = 'https://nolpvuulobusfuvjuxob.supabase.co';
   const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5vbHB2dXVsb2J1c2Z1dmp1eG9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODEwMDQ0NjIsImV4cCI6MjA5NjU4MDQ2Mn0.KA6c8-7jS8x4LL83ngTptgD5JCoqFrNs3kcsHwnJCPc';
   const BUCKET = 'gondola-imagenes';
   const TABLA  = 'imagenes_gondola';
 
-  let items      = []; // { id, file, estado: 'procesando'|'ok'|'error', detections, img, error }
-  let contadorId = 0;
+  let archivos   = [];
   let salaActual = '';
 
-  // Esta versión solo etiqueta/cuenta Marco Polo Amarilla y Rústica -- el
-  // modelo sigue detectando las demás clases por dentro, pero se filtran
-  // antes de mostrarse o guardarse (ver procesarDeteccion).
-  const CLASES_PERMITIDAS = ['mp_amarilla', 'mp_rustica'];
-  const CLASES_COLUMNAS = CLASES_PERMITIDAS;
-
-  // Paleta fija por clase para que los recuadros sean consistentes entre fotos.
-  const PALETA = ['#0071CE', '#00A651', '#E53935', '#F5A623', '#8E44AD', '#16A085', '#D35400', '#2C3E50', '#C0392B', '#27AE60'];
-  const colorPorClase = new Map();
-  function colorDeClase(nombreClase) {
-    if (!colorPorClase.has(nombreClase)) {
-      colorPorClase.set(nombreClase, PALETA[colorPorClase.size % PALETA.length]);
-    }
-    return colorPorClase.get(nombreClase);
-  }
-
-  // ── Modal de zoom (revisar el etiquetado en grande) ─────
-  const modalOverlay  = document.getElementById('modal-overlay');
-  const modalViewport = document.getElementById('modal-viewport');
-  const modalCanvas   = document.getElementById('modal-canvas');
-  const modalNombre   = document.getElementById('modal-nombre');
-  const modalClose    = document.getElementById('modal-close');
-
-  const zoomState = { zoom: 1, panX: 0, panY: 0 };
-  const ZOOM_MIN = 1;
-  const ZOOM_MAX = 6;
-  let arrastrando = false;
-  let arrastreInicio = { x: 0, y: 0, panX: 0, panY: 0 };
-
-  modalClose.addEventListener('click', cerrarModal);
-  modalOverlay.addEventListener('click', (e) => { if (e.target === modalOverlay) cerrarModal(); });
-  document.addEventListener('keydown', (e) => { if (e.key === 'Escape') cerrarModal(); });
-
-  function aplicarTransformModal() {
-    modalCanvas.style.transform = `translate(${zoomState.panX}px, ${zoomState.panY}px) scale(${zoomState.zoom})`;
-    modalViewport.style.cursor = zoomState.zoom > 1 ? 'grab' : 'default';
-  }
-
-  function cambiarZoom(factor) {
-    zoomState.zoom = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoomState.zoom * factor));
-    if (zoomState.zoom === ZOOM_MIN) { zoomState.panX = 0; zoomState.panY = 0; }
-    aplicarTransformModal();
-  }
-
-  function resetearZoomModal() {
-    zoomState.zoom = 1;
-    zoomState.panX = 0;
-    zoomState.panY = 0;
-    aplicarTransformModal();
-  }
-
-  document.getElementById('modal-zoom-in').addEventListener('click', () => cambiarZoom(1.3));
-  document.getElementById('modal-zoom-out').addEventListener('click', () => cambiarZoom(1 / 1.3));
-  document.getElementById('modal-zoom-reset').addEventListener('click', resetearZoomModal);
-
-  modalViewport.addEventListener('wheel', (e) => {
-    e.preventDefault();
-    cambiarZoom(e.deltaY < 0 ? 1.15 : 1 / 1.15);
-  }, { passive: false });
-
-  modalViewport.addEventListener('dblclick', () => {
-    if (zoomState.zoom > 1) {
-      resetearZoomModal();
-    } else {
-      zoomState.zoom = 2.5;
-      aplicarTransformModal();
-    }
-  });
-
-  modalViewport.addEventListener('mousedown', (e) => {
-    if (zoomState.zoom <= 1) return;
-    arrastrando = true;
-    modalViewport.classList.add('dragging');
-    arrastreInicio = { x: e.clientX, y: e.clientY, panX: zoomState.panX, panY: zoomState.panY };
-  });
-  window.addEventListener('mousemove', (e) => {
-    if (!arrastrando) return;
-    zoomState.panX = arrastreInicio.panX + (e.clientX - arrastreInicio.x);
-    zoomState.panY = arrastreInicio.panY + (e.clientY - arrastreInicio.y);
-    aplicarTransformModal();
-  });
-  window.addEventListener('mouseup', () => {
-    arrastrando = false;
-    modalViewport.classList.remove('dragging');
-  });
-
-  function dibujarDetecciones(canvas, img, detecciones, maxAncho = 96) {
-    const escala = Math.min(1, maxAncho / img.naturalWidth);
-    canvas.width  = img.naturalWidth * escala;
-    canvas.height = img.naturalHeight * escala;
-
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-    detecciones.forEach((d) => {
-      const x1 = (d.x - d.width / 2) * escala;
-      const y1 = (d.y - d.height / 2) * escala;
-      const w  = d.width * escala;
-      const h  = d.height * escala;
-      const color = colorDeClase(d.class);
-
-      const grosor = Math.max(1, Math.min(2.5, w * 0.015));
-      ctx.strokeStyle = color;
-      ctx.lineWidth = grosor;
-      ctx.strokeRect(x1, y1, w, h);
-
-      const fontSize = Math.max(9, Math.min(16, w * 0.2));
-      ctx.font = `${Math.round(fontSize)}px Inter, sans-serif`;
-
-      let etiqueta = d.class;
-      while (etiqueta.length > 3 && ctx.measureText(etiqueta).width > w - 4) {
-        etiqueta = etiqueta.slice(0, -1);
-      }
-      if (etiqueta !== d.class) etiqueta = etiqueta.slice(0, -1) + '…';
-
-      const anchoTexto = ctx.measureText(etiqueta).width + fontSize * 0.6;
-      const altoEtiqueta = fontSize + 3;
-      ctx.fillStyle = color;
-      ctx.fillRect(x1, Math.max(0, y1 - altoEtiqueta), anchoTexto, altoEtiqueta);
-      ctx.fillStyle = '#fff';
-      ctx.fillText(etiqueta, x1 + fontSize * 0.3, Math.max(fontSize, y1 - 3));
-    });
-  }
-
-  function abrirModal(nombre, img, detecciones) {
-    const resolucionDibujo = Math.min(img.naturalWidth, 1600);
-    dibujarDetecciones(modalCanvas, img, detecciones, resolucionDibujo);
-    modalNombre.textContent = nombre;
-    modalOverlay.classList.add('show');
-
-    const availW = (window.innerWidth || 1200) * 0.92;
-    const availH = (window.innerHeight || 800) * 0.72;
-    const fit = Math.min(availW / modalCanvas.width, availH / modalCanvas.height, 1);
-    const anchoBase = modalCanvas.width * fit;
-    const altoBase  = modalCanvas.height * fit;
-    modalCanvas.style.width  = `${anchoBase}px`;
-    modalCanvas.style.height = `${altoBase}px`;
-    modalViewport.style.width  = `${anchoBase}px`;
-    modalViewport.style.height = `${altoBase}px`;
-
-    resetearZoomModal();
-  }
-
-  function cerrarModal() {
-    modalOverlay.classList.remove('show');
-  }
-
-  function renderClasesLista(detecciones) {
-    const conteo = new Map();
-    detecciones.forEach((d) => conteo.set(d.class, (conteo.get(d.class) || 0) + 1));
-    const filas = [...conteo.entries()]
-      .sort((a, b) => b[1] - a[1])
-      .map(([clase, n]) => `
-        <div class="fila">
-          <span><span class="swatch" style="background:${colorDeClase(clase)}"></span>${clase}</span>
-          <span>${n}</span>
-        </div>
-      `)
-      .join('');
-    return `<div class="clases-lista">${filas}</div>`;
-  }
-
-  // ── Cámara con guía de encuadre ─────────────────────────
+  // ── Cámara con guía de encuadre + continuidad panorámica ────────────────
   // Proporción real de la góndola: ~120cm de ancho x ~175cm de alto.
   const RATIO_GONDOLA = 120 / 175;
+  // Ancho (relativo a la guía) del borde "fantasma" que se muestra para
+  // calzar el siguiente tramo con el anterior -- las fotos NO se unen en
+  // ningún momento, esto es solo una ayuda visual para encuadrar.
+  const GHOST_FRACCION = 0.16;
 
-  let camaraStream = null;
+  let camaraStream    = null;
+  let ultimaFotoSerie = null; // Image del último tramo capturado (o null si no hay continuidad activa)
+  let haciaLaDerecha  = true; // dirección en la que se recorre la góndola
+
   const camaraOverlay = document.getElementById('camara-overlay');
   const camaraVideo    = document.getElementById('camara-video');
   const camaraGuia     = document.getElementById('camara-guia');
+  const camaraGhost    = document.getElementById('camara-ghost');
   const camaraCanvas   = document.getElementById('camara-canvas');
+  const camaraHint     = document.getElementById('camara-hint');
+  const btnDireccion   = document.getElementById('camara-direccion');
+  const btnNuevaSerie  = document.getElementById('camara-nueva-serie');
 
   async function abrirCamara() {
     try {
@@ -452,6 +237,7 @@
       });
       camaraVideo.srcObject = camaraStream;
       camaraOverlay.classList.add('show');
+      actualizarBotonNuevaSerie();
       requestAnimationFrame(posicionarGuia);
     } catch (err) {
       // Sin permiso de cámara / navegador sin soporte -- recae en el selector nativo.
@@ -470,10 +256,39 @@
       ancho = vw * 0.92;
       alto  = ancho / RATIO_GONDOLA;
     }
+    const left = (vw - ancho) / 2;
+    const top  = (vh - alto) / 2;
     camaraGuia.style.width  = `${ancho}px`;
     camaraGuia.style.height = `${alto}px`;
-    camaraGuia.style.left   = `${(vw - ancho) / 2}px`;
-    camaraGuia.style.top    = `${(vh - alto) / 2}px`;
+    camaraGuia.style.left   = `${left}px`;
+    camaraGuia.style.top    = `${top}px`;
+    dibujarFantasma(left, top, ancho, alto);
+  }
+
+  function dibujarFantasma(left, top, ancho, alto) {
+    if (!ultimaFotoSerie) {
+      camaraGhost.style.display = 'none';
+      camaraHint.textContent = 'Encuadrá la góndola completa (aprox. 120cm ancho x 175cm alto)';
+      return;
+    }
+    const anchoFantasma = ancho * GHOST_FRACCION;
+    camaraGhost.style.display = 'block';
+    camaraGhost.style.top    = `${top}px`;
+    camaraGhost.style.height = `${alto}px`;
+    camaraGhost.style.width  = `${anchoFantasma}px`;
+    camaraGhost.style.left   = haciaLaDerecha ? `${left}px` : `${left + ancho - anchoFantasma}px`;
+    camaraGhost.width  = Math.max(1, Math.round(anchoFantasma));
+    camaraGhost.height = Math.max(1, Math.round(alto));
+
+    const img  = ultimaFotoSerie;
+    const srcW = img.naturalWidth * GHOST_FRACCION;
+    const srcX = haciaLaDerecha ? (img.naturalWidth - srcW) : 0;
+    camaraGhost.getContext('2d').drawImage(
+      img, srcX, 0, srcW, img.naturalHeight,
+      0, 0, camaraGhost.width, camaraGhost.height
+    );
+
+    camaraHint.textContent = 'Alineá el siguiente tramo con el borde difuminado';
   }
 
   window.addEventListener('resize', () => {
@@ -490,6 +305,27 @@
 
   document.getElementById('camara-cancelar').addEventListener('click', cerrarCamara);
 
+  function actualizarBotonDireccion() {
+    btnDireccion.textContent = haciaLaDerecha ? '➡ Hacia la derecha' : '⬅ Hacia la izquierda';
+  }
+  actualizarBotonDireccion();
+
+  btnDireccion.addEventListener('click', () => {
+    haciaLaDerecha = !haciaLaDerecha;
+    actualizarBotonDireccion();
+    posicionarGuia();
+  });
+
+  function actualizarBotonNuevaSerie() {
+    btnNuevaSerie.style.display = ultimaFotoSerie ? 'inline-block' : 'none';
+  }
+
+  btnNuevaSerie.addEventListener('click', () => {
+    ultimaFotoSerie = null;
+    actualizarBotonNuevaSerie();
+    posicionarGuia();
+  });
+
   document.getElementById('camara-capturar').addEventListener('click', () => {
     const vw = camaraVideo.videoWidth;
     const vh = camaraVideo.videoHeight;
@@ -501,7 +337,17 @@
       if (!blob) return;
       const archivo = new File([blob], `gondola_${Date.now()}.jpg`, { type: 'image/jpeg' });
       agregarArchivos([archivo]);
-      cerrarCamara();
+
+      // Esta foto queda como referencia para calzar el siguiente tramo -- la
+      // cámara se queda abierta (no se unen las imágenes, solo se guarda
+      // como guía visual) para poder seguir fotografiando el resto de la góndola.
+      const img = new Image();
+      img.onload = () => {
+        ultimaFotoSerie = img;
+        actualizarBotonNuevaSerie();
+        posicionarGuia();
+      };
+      img.src = URL.createObjectURL(blob);
     }, 'image/jpeg', 0.92);
   });
 
@@ -569,147 +415,44 @@
     return `${SUPABASE_URL}/storage/v1/object/public/${BUCKET}/${nombre}`;
   }
 
-  async function insertarEnDB(sala, url, nombre, detecciones) {
-    const conteoPorClase = {};
-    CLASES_COLUMNAS.forEach((c) => { conteoPorClase[c] = 0; });
-    detecciones.forEach((d) => {
-      if (d.class in conteoPorClase) conteoPorClase[d.class] += 1;
-    });
-
-    const fila = {
-      sala,
-      url_imagen: url,
-      nombre_archivo: nombre,
-      total_productos: detecciones.length,
-      ...conteoPorClase,
-    };
-
+  async function insertarEnDB(sala, url, nombre) {
     const res = await supabaseFetch(`/rest/v1/${TABLA}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
-      body: JSON.stringify(fila)
+      body: JSON.stringify({ sala, url_imagen: url, nombre_archivo: nombre })
     });
     if (!res.ok) throw new Error(`DB error: ${res.status}`);
   }
 
-  // ── Archivos: se agregan y se detectan de inmediato ─────
+  // ── Archivos ───────────────────────────────────────────
   function agregarArchivos(nuevos) {
-    const validos = nuevos.filter((f) => f.type.startsWith('image/'));
-    validos.forEach((file) => {
-      const item = { id: ++contadorId, file, estado: 'procesando', detections: null, img: null, error: null };
-      items.push(item);
-      procesarDeteccion(item);
-    });
+    for (const f of nuevos) archivos.push(f);
     renderPreviews();
     actualizarBoton();
-  }
-
-  async function procesarDeteccion(item) {
-    try {
-      // Se manda una copia redimensionada al detector -- Vercel corta
-      // requests de más de ~4.5MB (base64 infla el tamaño ~33%) y las fotos
-      // de cámara de celular/galería a menudo superan eso. La foto original
-      // sin tocar (item.file) es la que se sube a Supabase al confirmar.
-      const imagenRedimensionada = await redimensionarParaDeteccion(item.file);
-      const [resultado, img] = await Promise.all([
-        window.RoboflowGondola.runGondolaWorkflow(imagenRedimensionada),
-        cargarImagen(imagenRedimensionada),
-      ]);
-      item.estado = 'ok';
-      item.detections = resultado.detections.filter((d) => CLASES_PERMITIDAS.includes(d.class));
-      item.img = img; // misma imagen que se detectó -- coordenadas coinciden
-    } catch (err) {
-      item.estado = 'error';
-      item.error = err.message || 'Error procesando la imagen';
-      console.error('[Roboflow] Error en', item.file.name, err);
-    }
-    renderPreviews();
-    actualizarBoton();
-  }
-
-  function cargarImagen(file) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error('No se pudo cargar la imagen en el navegador'));
-      img.src = URL.createObjectURL(file);
-    });
-  }
-
-  async function redimensionarParaDeteccion(file, maxLado = 1600, calidad = 0.8) {
-    const img = await cargarImagen(file);
-    const escala = Math.min(1, maxLado / Math.max(img.naturalWidth, img.naturalHeight));
-    const canvas = document.createElement('canvas');
-    canvas.width  = Math.round(img.naturalWidth * escala);
-    canvas.height = Math.round(img.naturalHeight * escala);
-    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
-
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/jpeg', calidad));
-    if (!blob) throw new Error('No se pudo redimensionar la imagen');
-    return blob;
   }
 
   function renderPreviews() {
-    const cont = document.getElementById('resultados');
-    cont.innerHTML = '';
-
-    if (items.length === 0) {
-      cont.innerHTML = '<div class="preview-count">Elegí o tomá fotos para que se procesen automáticamente.</div>';
-      return;
-    }
-
-    items.forEach((item) => {
+    const grid  = document.getElementById('preview-grid');
+    const count = document.getElementById('preview-count');
+    grid.innerHTML = '';
+    archivos.forEach((f, i) => {
+      const url = URL.createObjectURL(f);
       const div = document.createElement('div');
-      div.className = 'resultado-item';
-
-      if (item.estado === 'procesando') {
-        div.innerHTML = `
-          <img class="miniatura" src="${URL.createObjectURL(item.file)}" />
-          <div class="resultado-info">
-            <div class="nombre">${item.file.name}</div>
-            <div class="estado-pendiente">⏳ Procesando…</div>
-            <button class="remove-btn" onclick="removeFile(${item.id})">Quitar</button>
-          </div>
-        `;
-      } else if (item.estado === 'ok') {
-        const canvas = document.createElement('canvas');
-        dibujarDetecciones(canvas, item.img, item.detections);
-        canvas.addEventListener('click', () => abrirModal(item.file.name, item.img, item.detections));
-
-        const info = document.createElement('div');
-        info.className = 'resultado-info';
-        info.innerHTML = `
-          <div class="nombre">${item.file.name}</div>
-          <div class="estado-ok">✅ ${item.detections.length} producto(s) detectado(s)</div>
-          ${renderClasesLista(item.detections)}
-          <button class="remove-btn" onclick="removeFile(${item.id})">Quitar</button>
-        `;
-        div.appendChild(canvas);
-        div.appendChild(info);
-      } else {
-        div.innerHTML = `
-          <img class="miniatura" src="${URL.createObjectURL(item.file)}" />
-          <div class="resultado-info">
-            <div class="nombre">${item.file.name}</div>
-            <div class="estado-error">❌ ${item.error}</div>
-            <button class="remove-btn" onclick="removeFile(${item.id})">Quitar</button>
-          </div>
-        `;
-      }
-
-      document.getElementById('resultados').appendChild(div);
+      div.className = 'preview-item';
+      div.innerHTML = `<img src="${url}" /><button class="remove-btn" onclick="removeFile(${i})">✕</button>`;
+      grid.appendChild(div);
     });
+    count.textContent = archivos.length > 0 ? `${archivos.length} foto(s) seleccionada(s)` : '';
   }
 
-  function removeFile(id) {
-    items = items.filter((it) => it.id !== id);
+  function removeFile(i) {
+    archivos.splice(i, 1);
     renderPreviews();
     actualizarBoton();
   }
 
   function actualizarBoton() {
-    const hayPendientes = items.some((it) => it.estado === 'procesando');
-    document.getElementById('btn-subir').disabled = !(salaActual && items.length > 0 && !hayPendientes);
+    document.getElementById('btn-subir').disabled = !(salaActual && archivos.length > 0);
   }
 
   document.getElementById('file-input').addEventListener('change', e => {
@@ -730,58 +473,46 @@
     agregarArchivos(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
   });
 
-  // ── Confirmar y guardar ─────────────────────────────────
-  // La detección ya se hizo al agregar cada foto (procesarDeteccion). Acá
-  // solo se sube la imagen y se guarda la fila con los conteos ya calculados.
-  async function confirmarYGuardar() {
-    const hayPendientes = items.some((it) => it.estado === 'procesando');
-    if (!salaActual || items.length === 0 || hayPendientes) return;
-
+  // ── Subida ─────────────────────────────────────────────
+  async function subirImagenes() {
+    if (!salaActual || archivos.length === 0) return;
     const btn    = document.getElementById('btn-subir');
     const pwrap  = document.getElementById('progress-wrap');
     const pbar   = document.getElementById('progress-bar');
     const plabel = document.getElementById('progress-label');
     btn.disabled = true;
     pwrap.style.display = 'block';
-
     const errores = [];
-    let totalDetecciones = 0;
-
-    for (let i = 0; i < items.length; i++) {
-      const item = items[i];
-      plabel.textContent = `Guardando ${i + 1} de ${items.length}...`;
-      pbar.style.width   = `${Math.round((i / items.length) * 100)}%`;
+    for (let i = 0; i < archivos.length; i++) {
+      const f = archivos[i];
+      plabel.textContent = `Subiendo ${i + 1} de ${archivos.length}...`;
+      pbar.style.width   = `${Math.round((i / archivos.length) * 100)}%`;
       try {
         const ts     = new Date().toISOString().replace(/[:.]/g, '-');
         const uid    = Math.random().toString(36).slice(2, 8);
-        const ext    = item.file.name.split('.').pop() || 'jpg';
+        const ext    = f.name.split('.').pop() || 'jpg';
         const nombre = `${salaActual.replace(/[^a-zA-Z0-9]/g, '_')}_${ts}_${uid}.${ext}`;
-        const detecciones = item.estado === 'ok' ? item.detections : [];
-
-        const url = await subirAStorage(item.file, nombre);
-        await insertarEnDB(salaActual, url, nombre, detecciones);
-        totalDetecciones += detecciones.length;
+        const url    = await subirAStorage(f, nombre);
+        await insertarEnDB(salaActual, url, nombre);
       } catch (err) {
-        errores.push(item.file.name);
+        errores.push(f.name);
         console.error(err);
       }
     }
-
     pbar.style.width = '100%';
     plabel.textContent = 'Completado';
     setTimeout(() => { pwrap.style.display = 'none'; pbar.style.width = '0%'; }, 1000);
-
     if (errores.length === 0) {
-      mostrarToast(`✅ ${items.length} foto(s) guardada(s) · ${totalDetecciones} producto(s) detectado(s)`, 'success');
-      items = [];
-      salaActual = '';
+      mostrarToast(`✅ ${archivos.length} foto(s) subida(s) correctamente`, 'success');
+      archivos = [];
+      ultimaFotoSerie = null;
       renderPreviews();
       document.getElementById('sala-input').value = '';
       document.getElementById('sala-seleccionada').style.display = 'none';
     } else {
       mostrarToast(`⚠️ Error en ${errores.length} foto(s)`, 'error');
     }
-    actualizarBoton();
+    btn.disabled = true;
   }
 
   function mostrarToast(msg, tipo = 'success') {
@@ -791,5 +522,6 @@
     setTimeout(() => t.classList.remove('show'), 3500);
   }
 </script>
+
 </body>
 </html>
