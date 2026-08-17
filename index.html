@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>ICB · Góndola Walmart (Marco Polo)</title>
+  <title>ICB · Góndola Walmart</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
     :root {
@@ -61,13 +61,6 @@
     #camara-video {
       position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
     }
-    .camara-guia {
-      position: absolute;
-      border: 3px solid rgba(255, 255, 255, 0.95);
-      box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.55);
-      border-radius: 6px;
-      pointer-events: none;
-    }
     .camara-ghost {
       position: absolute;
       opacity: 0.45;
@@ -108,7 +101,7 @@
 <header>
   <div class="logo">ICB</div>
   <div>
-    <h1>Registro de Góndola · Marco Polo</h1>
+    <h1>Registro de Góndola</h1>
     <p>Walmart · Canal Moderno</p>
   </div>
 </header>
@@ -117,7 +110,7 @@
 
   <div class="info-strip">
     <span style="font-size:18px">📋</span>
-    <p>Sube fotos de góndola de <strong>Papas Fritas Amarillas Marco Polo</strong> y <strong>Rústicas Marco Polo</strong>. Selecciona la sala antes de subir.</p>
+    <p>Sube fotos de la góndola de <strong>snacks</strong>. Selecciona la sala antes de subir.</p>
   </div>
 
   <!-- Selección de sala -->
@@ -181,9 +174,8 @@
 
 <div class="camara-overlay" id="camara-overlay">
   <video id="camara-video" autoplay playsinline muted></video>
-  <div class="camara-guia" id="camara-guia"></div>
   <canvas class="camara-ghost" id="camara-ghost" style="display:none;"></canvas>
-  <div class="camara-hint" id="camara-hint">Encuadrá la góndola completa (aprox. 120cm ancho x 175cm alto)</div>
+  <div class="camara-hint" id="camara-hint"></div>
   <div class="camara-topbar">
     <button class="camara-pill" id="camara-direccion" type="button"></button>
     <button class="camara-pill" id="camara-nueva-serie" type="button" style="display:none;">🔄 Nueva serie</button>
@@ -205,11 +197,9 @@
   let salaActual = '';
 
   // ── Cámara con guía de encuadre + continuidad panorámica ────────────────
-  // Proporción real de la góndola: ~120cm de ancho x ~175cm de alto.
-  const RATIO_GONDOLA = 120 / 175;
-  // Ancho (relativo a la guía) del borde "fantasma" que se muestra para
-  // calzar el siguiente tramo con el anterior -- las fotos NO se unen en
-  // ningún momento, esto es solo una ayuda visual para encuadrar.
+  // Ancho (relativo al ancho de la cámara) del borde "fantasma" que se
+  // muestra para calzar el siguiente tramo con el anterior -- las fotos NO
+  // se unen en ningún momento, esto es solo una ayuda visual para encuadrar.
   const GHOST_FRACCION = 0.16;
 
   let camaraStream    = null;
@@ -218,7 +208,6 @@
 
   const camaraOverlay = document.getElementById('camara-overlay');
   const camaraVideo    = document.getElementById('camara-video');
-  const camaraGuia     = document.getElementById('camara-guia');
   const camaraGhost    = document.getElementById('camara-ghost');
   const camaraCanvas   = document.getElementById('camara-canvas');
   const camaraHint     = document.getElementById('camara-hint');
@@ -238,7 +227,7 @@
       camaraVideo.srcObject = camaraStream;
       camaraOverlay.classList.add('show');
       actualizarBotonNuevaSerie();
-      requestAnimationFrame(posicionarGuia);
+      requestAnimationFrame(dibujarFantasma);
     } catch (err) {
       // Sin permiso de cámara / navegador sin soporte -- recae en el selector nativo.
       console.error('No se pudo abrir la cámara en la página, usando selector nativo:', err);
@@ -246,39 +235,25 @@
     }
   }
 
-  function posicionarGuia() {
+  function dibujarFantasma() {
     const vw = camaraVideo.clientWidth;
     const vh = camaraVideo.clientHeight;
     if (!vw || !vh) return;
-    let alto  = vh * 0.82;
-    let ancho = alto * RATIO_GONDOLA;
-    if (ancho > vw * 0.92) {
-      ancho = vw * 0.92;
-      alto  = ancho / RATIO_GONDOLA;
-    }
-    const left = (vw - ancho) / 2;
-    const top  = (vh - alto) / 2;
-    camaraGuia.style.width  = `${ancho}px`;
-    camaraGuia.style.height = `${alto}px`;
-    camaraGuia.style.left   = `${left}px`;
-    camaraGuia.style.top    = `${top}px`;
-    dibujarFantasma(left, top, ancho, alto);
-  }
 
-  function dibujarFantasma(left, top, ancho, alto) {
     if (!ultimaFotoSerie) {
       camaraGhost.style.display = 'none';
-      camaraHint.textContent = 'Encuadrá la góndola completa (aprox. 120cm ancho x 175cm alto)';
+      camaraHint.textContent = '';
       return;
     }
-    const anchoFantasma = ancho * GHOST_FRACCION;
+
+    const anchoFantasma = vw * GHOST_FRACCION;
     camaraGhost.style.display = 'block';
-    camaraGhost.style.top    = `${top}px`;
-    camaraGhost.style.height = `${alto}px`;
+    camaraGhost.style.top    = '0px';
+    camaraGhost.style.height = `${vh}px`;
     camaraGhost.style.width  = `${anchoFantasma}px`;
-    camaraGhost.style.left   = haciaLaDerecha ? `${left}px` : `${left + ancho - anchoFantasma}px`;
+    camaraGhost.style.left   = haciaLaDerecha ? '0px' : `${vw - anchoFantasma}px`;
     camaraGhost.width  = Math.max(1, Math.round(anchoFantasma));
-    camaraGhost.height = Math.max(1, Math.round(alto));
+    camaraGhost.height = Math.max(1, Math.round(vh));
 
     const img  = ultimaFotoSerie;
     const srcW = img.naturalWidth * GHOST_FRACCION;
@@ -292,7 +267,7 @@
   }
 
   window.addEventListener('resize', () => {
-    if (camaraOverlay.classList.contains('show')) posicionarGuia();
+    if (camaraOverlay.classList.contains('show')) dibujarFantasma();
   });
 
   function cerrarCamara() {
@@ -313,7 +288,7 @@
   btnDireccion.addEventListener('click', () => {
     haciaLaDerecha = !haciaLaDerecha;
     actualizarBotonDireccion();
-    posicionarGuia();
+    dibujarFantasma();
   });
 
   function actualizarBotonNuevaSerie() {
@@ -323,7 +298,7 @@
   btnNuevaSerie.addEventListener('click', () => {
     ultimaFotoSerie = null;
     actualizarBotonNuevaSerie();
-    posicionarGuia();
+    dibujarFantasma();
   });
 
   document.getElementById('camara-capturar').addEventListener('click', () => {
@@ -345,7 +320,7 @@
       img.onload = () => {
         ultimaFotoSerie = img;
         actualizarBotonNuevaSerie();
-        posicionarGuia();
+        dibujarFantasma();
       };
       img.src = URL.createObjectURL(blob);
     }, 'image/jpeg', 0.92);
