@@ -263,7 +263,18 @@
       0, 0, camaraGhost.width, camaraGhost.height
     );
 
-    camaraHint.textContent = 'Alineá el siguiente tramo con el borde difuminado';
+    camaraHint.textContent = 'Alineá el siguiente tramo con el borde difuminado -- esa franja se recorta sola';
+  }
+
+  // Calcula qué parte de la foto recién tomada hay que descartar para no
+  // duplicar la franja que ya quedó registrada en la foto anterior (la
+  // misma franja que se muestra difuminada como referencia de encuadre).
+  function calcularRecorteCaptura(vw) {
+    if (!ultimaFotoSerie) return { srcX: 0, outW: vw };
+    const recorte = vw * GHOST_FRACCION;
+    return haciaLaDerecha
+      ? { srcX: recorte, outW: vw - recorte }
+      : { srcX: 0, outW: vw - recorte };
   }
 
   window.addEventListener('resize', () => {
@@ -305,9 +316,11 @@
     const vw = camaraVideo.videoWidth;
     const vh = camaraVideo.videoHeight;
     if (!vw || !vh) return;
-    camaraCanvas.width  = vw;
+
+    const { srcX, outW } = calcularRecorteCaptura(vw);
+    camaraCanvas.width  = outW;
     camaraCanvas.height = vh;
-    camaraCanvas.getContext('2d').drawImage(camaraVideo, 0, 0, vw, vh);
+    camaraCanvas.getContext('2d').drawImage(camaraVideo, srcX, 0, outW, vh, 0, 0, outW, vh);
     camaraCanvas.toBlob((blob) => {
       if (!blob) return;
       const archivo = new File([blob], `gondola_${Date.now()}.jpg`, { type: 'image/jpeg' });

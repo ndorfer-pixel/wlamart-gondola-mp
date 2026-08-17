@@ -20,22 +20,26 @@ columna.
    fila (sala, url, nombre de archivo) en `imagenes_gondola`. Nada se
    etiqueta ni se procesa con IA.
 
-## Cámara: guía de encuadre + continuidad para góndolas largas
+## Cámara: continuidad para góndolas largas (sin recuadro de encuadre)
 
-"📷 Tomar foto" abre la cámara dentro de la página (`getUserMedia`) con un
-recuadro guía en la proporción real de la góndola (120cm ancho × 175cm alto).
+"📷 Tomar foto" abre la cámara dentro de la página (`getUserMedia`), sin
+ningún recuadro guía -- usa todo el visor.
 
 Para góndolas de varios metros (una sola foto no alcanza), hay una ayuda de
 **continuidad entre tramos** -- **no une ni hace stitching de las fotos**,
 cada una se guarda por separado:
 
 - Después de sacar una foto, la cámara se queda abierta y muestra un
-  **borde difuminado** de esa misma foto pegado al costado del encuadre.
+  **borde difuminado** de esa misma foto pegado a un costado del visor.
 - Ese borde es el tramo de la góndola que ya quedó fotografiado -- alineás
   el celular para que el siguiente tramo empiece justo donde terminó el
-  anterior, y sacás la próxima foto ya calzada.
+  anterior.
+- Al sacar la próxima foto, la franja que coincide con el borde difuminado
+  se **recorta automáticamente** de la nueva imagen -- así esa parte de la
+  góndola no queda fotografiada dos veces (una vez en la foto anterior y
+  otra en la nueva).
 - Botón **➡/⬅** para elegir la dirección en la que se recorre la góndola
-  (de qué lado se muestra el borde de referencia).
+  (de qué lado se muestra el borde de referencia y se recorta la siguiente foto).
 - Botón **🔄 Nueva serie** para sacarte de encima el borde de referencia
   cuando vas a fotografiar una góndola distinta o no relacionada.
 
@@ -43,7 +47,7 @@ cada una se guarda por separado:
 
 | Archivo | Qué hace |
 |---|---|
-| `index.html` | Toda la app: sala, cámara con guía + continuidad, subida a Supabase. |
+| `index.html` | Toda la app: sala, cámara con continuidad (recorte automático de duplicados), subida a Supabase. |
 | `iniciar_app.bat` | Doble click para levantar el servidor local y abrir la app. |
 
 ## Setup local
